@@ -1,0 +1,21 @@
+body { scrollbar-3d-light-color: #46555F;
+       scrollbar-arrow-color: #363636;
+       scrollbar-base-color: #363636;
+       scrollbar-dark-shadow-color: #363636;
+       scrollbar-face-color: #46555F;
+       scrollbar-highlight-color: #363636;
+       scrollbar-shadow-color: #363636; }
+
+A:link {color: #C4CBEA; text-decoration: none}
+
+A:visited {color: #C4CBEA; text-decoration: none}
+
+A:active {color: #296C82}
+
+A:hover {color: #296C82}
+
+.table_001 {border-width: 1px; border-style: solid}
+
+.table_002 {border-width: 1px; border-style: solid; filter:Alpha(Opacity=85, FinishOpacity=55, Style=3)}
+
+.table_003 {border-width: 0px; filter:Alpha(Opacity=85, FinishOpacity=55, Style=3)}
