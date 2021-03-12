@@ -3,7 +3,7 @@
 <head>
 <LINK href="../fsize-b.css" rel=stylesheet>
 <meta http-equiv="Content-Type" content="text/html; charset=big5">
-<title>ª«²z¶Ë®`­pºâ</title>
+<title>ç‰©ç†å‚·å®³è¨ˆç®—</title>
 <STYLE>BODY {
 	SCROLLBAR-FACE-COLOR: #d8e8f5; SCROLLBAR-HIGHLIGHT-COLOR: #ffffff; SCROLLBAR-SHADOW-COLOR: #6b8ec6; SCROLLBAR-3DLIGHT-COLOR: #6b8ec6; SCROLLBAR-ARROW-COLOR: #6b8ec6; SCROLLBAR-TRACK-COLOR: #ffffff; SCROLLBAR-DARKSHADOW-COLOR: #ffffff; SCROLLBAR-BASE-COLOR: #000000
 }
@@ -21,9 +21,9 @@ function Phoenix()
 		atkLV=CG.atkLV.value;
 		defLV=CG.defLV.value;
 						
-		if (CG.attacker[3].status)		//±YÀ»
+		if (CG.attacker[3].status)		//å´©æ“Š
 		{
-			if (!CG.atked[0].status)		//¤£¨¾¿m
+			if (!CG.atked[0].status)		//ä¸é˜²ç¦¦
 			{
 				CG.damage90.value = "Miss";
 				CG.damage91.value = "Miss";
@@ -46,29 +46,29 @@ function Phoenix()
 				CG.damage108.value = "Miss";
 				CG.damage109.value = "Miss";
 				CG.damage110.value = "Miss";
-				alert("±YÀ»½Ğ¯¸¦nµ¹¥L±Y¼K!");
+				alert("å´©æ“Šè«‹ç«™å¥½çµ¦ä»–å´©å˜¿!");
 				return false;
 			}
 		}
 		
-		if (CG.atked[1].status)			//½Ñ¤b
+		if (CG.atked[1].status)			//è«¸åˆƒ
 		{
 			def = def * (1-(CG.sdie.value) * 5 / 100);
 		}
 		
-		if (CG.atked[2].status)			//¶§ª¢
+		if (CG.atked[2].status)			//é™½ç‚
 		{
 			def = def * (1-(CG.bdie.value) * 7 / 100);
 		}
 		
-		sdef = def / 2				//¥²±ş¥Î
+		sdef = def / 2				//å¿…æ®ºç”¨
 		
-		if (CG.attacker[1].status)		//½Ñ¤b
+		if (CG.attacker[1].status)		//è«¸åˆƒ
 		{
 			atk = atk * (1+(CG.small.value) * 7 / 100);
 		}
 		
-		if (atk > 240 )				//240¤§«á¶}©l´î½w¼W­È
+		if (atk > 240 )				//240ä¹‹å¾Œé–‹å§‹æ¸›ç·©å¢å€¼
 		{
 			atk = 240 + (atk-240) * 3 / 10
 		};
@@ -78,35 +78,35 @@ function Phoenix()
 			def = 240 + (def-240) * 3 / 10
 		};
 		
-		atk = atk * 1;				//¦r¦êÂà¼Æ­È
+		atk = atk * 1;				//å­—ä¸²è½‰æ•¸å€¼
 		def = def * 1;
 		
 		down = atk + 3 * def;
 		up = 3 * atk * atk;
-		result = up / down			//¤£¬Û§Jªºµ²ªG
+		result = up / down			//ä¸ç›¸å…‹çš„çµæœ
 		
-		if (CG.weapon.value == "1")		//¦³®³ªZ¾¹
+		if (CG.weapon.value == "1")		//æœ‰æ‹¿æ­¦å™¨
 		{
 			result = result * 1.15;
 		}
 		
-		switch(CG.kind.value)			//ºØ±Ú
+		switch(CG.kind.value)			//ç¨®æ—
 		{
 		case "1":
 			result = result * 1.2;
 			break;
 		case "2":
-			result = result * 10 / 9;	//²q´ú..¤£«OÃÒ ÃÒ¹ê¿ù»~«á¥i­×¥¿
+			result = result * 10 / 9;	//çŒœæ¸¬..ä¸ä¿è­‰ è­‰å¯¦éŒ¯èª¤å¾Œå¯ä¿®æ­£
 			break;
 		case "4":
-			result = result * 8 / 9;	//½T©w
+			result = result * 8 / 9;	//ç¢ºå®š
 			break;
 		case "5":
 			result = result * 0.8;
 			break;
 		}
 		
-		if (CG.porn.value == "1")		//¤ô´¹
+		if (CG.porn.value == "1")		//æ°´æ™¶
 		{
 			result = result * (1+(CG.extn.value) * 3 / 1000);
 		}
@@ -115,31 +115,31 @@ function Phoenix()
 			result = result * (1-(CG.extn.value) * 3 / 1000);
 		}
 		
-//		switch(CG.special.value)			//¯S®í ¥şÄİ©Ê
+//		switch(CG.special.value)			//ç‰¹æ®Š å…¨å±¬æ€§
 //		{
-//		case "2": 				//¥şÄİ©Ê(¤¤) ªk¤ı ®ü¸é¤ı...µ¥ ¤@°ï
+//		case "2": 				//å…¨å±¬æ€§(ä¸­) æ³•ç‹ æµ·è³Šç‹...ç­‰ ä¸€å †
 //			result = result * 5 / 6;
 //			break;
 //		case "3":
-//			result = result * 0.4;		//±j ÅS¤ñ F4 ¤p©¬ µS¤j ·tÂå..µ¥
+//			result = result * 0.4;		//å¼· éœ²æ¯” F4 å°å¸• çŒ¶å¤§ æš—é†«..ç­‰
 //			break;
 //		}
 		
-		sresult = result + atkLV / defLV * sdef;	//¥²±ş
+		sresult = result + atkLV / defLV * sdef;	//å¿…æ®º
 		
-		if (CG.attacker[2].status)		//°®©[
+		if (CG.attacker[2].status)		//ä¹¾å¤
 		{
 			result = result * (1+(CG.big.value) / 10);
 			sresult = sresult * (1+(CG.big.value) / 10);
 		}
 		
-		if (CG.attacker[3].status)		//±Y¯Å
+		if (CG.attacker[3].status)		//å´©ç´š
 		{
 			result = result * (  ( (10 + (CG.sbig.value) * 1) * (10 + (CG.sbig.value) * 1) - 1 ) / 100 );
 			sresult = sresult * (  ( (10 + (CG.sbig.value) * 1) * (10 + (CG.sbig.value) * 1) - 1 ) / 100 );
 		}
 		
-							//µ²ªG
+							//çµæœ
 		CG.damage90.value = Math.floor(result * 0.90);
 		CG.damage91.value = Math.floor(result * 0.91);
 		CG.damage92.value = Math.floor(result * 0.92);
@@ -161,7 +161,7 @@ function Phoenix()
 		CG.damage108.value = Math.floor(result * 1.08);
 		CG.damage109.value = Math.floor(result * 1.09);
 		CG.damage110.value = Math.floor(result * 1.10);
-//		CG.sdamage90.value = Math.floor(sresult * 0.90);	//¥²±ş»~®t¹L¤j ®³±¼
+//		CG.sdamage90.value = Math.floor(sresult * 0.90);	//å¿…æ®ºèª¤å·®éå¤§ æ‹¿æ‰
 //		CG.sdamage91.value = Math.floor(sresult * 0.91);
 //		CG.sdamage92.value = Math.floor(sresult * 0.92);
 //		CG.sdamage93.value = Math.floor(sresult * 0.93);
@@ -195,7 +195,7 @@ function CheckATK(UI)
 			return(true);
 		}
 	}
-	alert ("½Ğ¿ï¾Ü§ğÀ»ªÌ§Ş¯à!");
+	alert ("è«‹é¸æ“‡æ”»æ“Šè€…æŠ€èƒ½!");
 	return (false);
 }
 
@@ -208,7 +208,7 @@ function CheckATKed(UI)
 			return(true);
 		}
 	}
-	alert ("½Ğ¿ï¾Ü®Á¥´ªÌ§Ş¯à!");
+	alert ("è«‹é¸æ“‡æŒ¨æ‰“è€…æŠ€èƒ½!");
 	return (false);
 }
 
@@ -221,12 +221,12 @@ function CheckATKed(UI)
     <table border="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber6" cellpadding="0">
       <tr>
         <td width="1%">
-    <font face="serif" style="font-size: ¤@¯ë">
+    <font face="serif" style="font-size: ä¸€èˆ¬">
     <img border="0" src="../images/left.gif" width="22" height="20"></font></td>
         <td width="98%" bgcolor="#6699CC"><b>
-    <font face="·s²Ó©úÅé" color="#FFFFFF" style="font-size: ¤@¯ë">PK¹ï¾Ôª«²z¶Ë®`­pºâ</font></b></td>
+    <font face="æ–°ç´°æ˜é«”" color="#FFFFFF" style="font-size: ä¸€èˆ¬">PKå°æˆ°ç‰©ç†å‚·å®³è¨ˆç®—</font></b></td>
         <td width="1%">
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">
     <img border="0" src="../images/right.gif" width="22" height="20"></font></td>
       </tr>
     </table>
@@ -237,63 +237,63 @@ function CheckATKed(UI)
 <TABLE width="100%" border=1 bordercolor="#6699CC" style="font-size: 10 pt">
   <TBODY>
   <TR>
-    <TD width="20%" bgcolor="#6699CC" align="center">¡@</TD>
+    <TD width="20%" bgcolor="#6699CC" align="center">ã€€</TD>
     <td width="40%" align="center" bgcolor="#6699CC" height="13"><b>
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">
-    <span style="font-size: ¤@¯ë">§ğÀ»ªÌ</span></font></b><span style="font-size: ¤@¯ë"></td>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">
+    <span style="font-size: ä¸€èˆ¬">æ”»æ“Šè€…</span></font></b><span style="font-size: ä¸€èˆ¬"></td>
     <td width="40%" align="center" bgcolor="#6699CC" height="13"><b>
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³Q§ğÀ»ªÌ</font></b></td>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">è¢«æ”»æ“Šè€…</font></b></td>
   </TR>
   <TR>
     <td width="20%" align="center" bgcolor="#6699CC" height="19"></span><b>
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">
-    <span style="font-size: ¤@¯ë">µ¥¯Å</span></font></b></td>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">
+    <span style="font-size: ä¸€èˆ¬">ç­‰ç´š</span></font></b></td>
     <TD width="35%" bgcolor="#EFF3F7">
-    <FONT color=blue face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><INPUT size=4 value=60 name=atkLV></FONT></TD>
+    <FONT color=blue face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><INPUT size=4 value=60 name=atkLV></FONT></TD>
     <TD width="73%" bgcolor="#EFF3F7">
-    <FONT color=red face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><INPUT size=4 value=60 name=defLV></FONT></TD>
+    <FONT color=red face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><INPUT size=4 value=60 name=defLV></FONT></TD>
     </TR>
   <TR>
     <td width="20%" align="center" bgcolor="#6699CC" height="17">
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><b>
-    <span style="font-size: ¤@¯ë">Âù¤è¯à¤O</span></b></font><span style="font-size: ¤@¯ë"></td>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><b>
+    <span style="font-size: ä¸€èˆ¬">é›™æ–¹èƒ½åŠ›</span></b></font><span style="font-size: ä¸€èˆ¬"></td>
     <TD width="35%" bgcolor="#EFF3F7"></span>
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë" color="blue">
-    <span style="font-size: ¤@¯ë">§ğÀ»¡G<INPUT size=4 value=640
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬" color="blue">
+    <span style="font-size: ä¸€èˆ¬">æ”»æ“Šï¼š<INPUT size=4 value=640
       name=attack></span></font></TD>
     <TD width="73%" bgcolor="#EFF3F7">
-    <font color="#FF0000" style="font-size: ¤@¯ë" face="·s²Ó©úÅé">
-    <span style="font-size: ¤@¯ë">¨¾</span></font><font style="font-size: ¤@¯ë" face="·s²Ó©úÅé" color="red"><span style="font-size: ¤@¯ë">¿m¡G<INPUT size=4 value=300
+    <font color="#FF0000" style="font-size: ä¸€èˆ¬" face="æ–°ç´°æ˜é«”">
+    <span style="font-size: ä¸€èˆ¬">é˜²</span></font><font style="font-size: ä¸€èˆ¬" face="æ–°ç´°æ˜é«”" color="red"><span style="font-size: ä¸€èˆ¬">ç¦¦ï¼š<INPUT size=4 value=300
       name=defence></span></font></TD>
     </TR>
   <TR>
     <TD width="20%" bgcolor="#6699CC" align="center"><b>
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¨Ï¥Î§Ş¯àºØÃş</font></b></TD>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ä½¿ç”¨æŠ€èƒ½ç¨®é¡</font></b></TD>
     <TD width="35%" bgcolor="#EFF3F7">
     <p style="margin-top: 0; margin-bottom: 0">
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë">
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬">
     <INPUT
-      type=radio name=attacker value="1" checked>´¶§ğ©Î¨Ï¥Î¶§ª¢</span></font></p>
+      type=radio name=attacker value="1" checked>æ™®æ”»æˆ–ä½¿ç”¨é™½ç‚</span></font></p>
     <p style="margin-top: 0; margin-bottom: 0">
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë">
-    <INPUT type=radio name=attacker value="2">½Ñ¤bµ¥¯Å<SELECT size=1 name=small> <OPTION value=1 selected>
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬">
+    <INPUT type=radio name=attacker value="2">è«¸åˆƒç­‰ç´š<SELECT size=1 name=small> <OPTION value=1 selected>
     1</OPTION> <OPTION
         value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
         <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
         value=7>7</OPTION> <OPTION value=8>8</OPTION> <OPTION value=9>9</OPTION>
         <OPTION value=10>10</OPTION></SELECT></span></font></p>
     <p style="margin-top: 0; margin-bottom: 0">
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë">
-    <INPUT type=radio name=attacker value="4">°®©[¤@ÂY<SELECT size=1 name=big> <OPTION value=1
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬">
+    <INPUT type=radio name=attacker value="4">ä¹¾å¤ä¸€æ“²<SELECT size=1 name=big> <OPTION value=1
         selected>1</OPTION> <OPTION value=2>2</OPTION> <OPTION
         value=3>3</OPTION> <OPTION value=4>4</OPTION> <OPTION value=5>5</OPTION>
         <OPTION value=6>6</OPTION> <OPTION value=7>7</OPTION> <OPTION
         value=8>8</OPTION> <OPTION value=9>9</OPTION> <OPTION
         value=10>10</OPTION></SELECT></span></font></p>
     <p style="margin-top: 0; margin-bottom: 0">
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë">
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬">
     <INPUT type=radio
-      name=attacker value="3">±YÀ»µ¥¯Å<SELECT size=1 name=sbig> <OPTION value=1 selected>
+      name=attacker value="3">å´©æ“Šç­‰ç´š<SELECT size=1 name=sbig> <OPTION value=1 selected>
     1</OPTION> <OPTION
         value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
         <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
@@ -302,13 +302,13 @@ function CheckATKed(UI)
     <TD width="73%" bgcolor="#EFF3F7">
     <table border="0" cellspacing="0" width="100%" id="AutoNumber2" cellpadding="0" style="border-collapse: collapse" bordercolor="#111111">
       <tr>
-        <td width="100%"><font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">
-        <span style="font-size: ¤@¯ë"><INPUT
-      type=radio name=atked value="1" checked>³q±`(­Y¹ï¤â±YÀ»«ü¨¾¿m)</span></font></td>
+        <td width="100%"><font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">
+        <span style="font-size: ä¸€èˆ¬"><INPUT
+      type=radio name=atked value="1" checked>é€šå¸¸(è‹¥å°æ‰‹å´©æ“ŠæŒ‡é˜²ç¦¦)</span></font></td>
       </tr>
       <tr>
-        <td width="100%"><font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">
-        <span style="font-size: ¤@¯ë"><INPUT type=radio name=atked value="2">¨Ï¥Î½Ñ¤b
+        <td width="100%"><font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">
+        <span style="font-size: ä¸€èˆ¬"><INPUT type=radio name=atked value="2">ä½¿ç”¨è«¸åˆƒ
       <SELECT size=1 name=sdie> <OPTION value=1 selected>1</OPTION> <OPTION
         value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
         <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
@@ -316,8 +316,8 @@ function CheckATKed(UI)
         <OPTION value=10>10</OPTION></SELECT> </span></font></td>
       </tr>
       <tr>
-        <td width="100%"><font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">
-        <span style="font-size: ¤@¯ë"><INPUT type=radio name=atked value="3">¨Ï¥Î¶§ª¢
+        <td width="100%"><font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">
+        <span style="font-size: ä¸€èˆ¬"><INPUT type=radio name=atked value="3">ä½¿ç”¨é™½ç‚
       <SELECT size=1 name=bdie> <OPTION value=1 selected>1</OPTION> <OPTION
         value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
         <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
@@ -325,47 +325,47 @@ function CheckATKed(UI)
         <OPTION value=10>10</OPTION></SELECT></span></font></td>
       </tr>
       <tr>
-        <td width="100%">¡@</td>
+        <td width="100%">ã€€</td>
       </tr>
     </table>
     </TD>
     </TR>
   <TR>
     <TD width="20%" bgcolor="#6699CC" align="center"><b>
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ªZ¾¹ª¬ºA</font></b></TD>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ­¦å™¨ç‹€æ…‹</font></b></TD>
     <TD width="108%" colspan="2" bgcolor="#EFF3F7"> 
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"> <SELECT size=1 name=weapon>
-        <OPTION value=1 selected>¦³ªZ¾¹(ª±®a©Î®æ°«¤h)</OPTION> <OPTION
-        value=2>µLªZ¾¹(«Dª±®a©Î«D®æ°«¤h)</OPTION></SELECT></font></TD>
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"> <SELECT size=1 name=weapon>
+        <OPTION value=1 selected>æœ‰æ­¦å™¨(ç©å®¶æˆ–æ ¼é¬¥å£«)</OPTION> <OPTION
+        value=2>ç„¡æ­¦å™¨(éç©å®¶æˆ–éæ ¼é¬¥å£«)</OPTION></SELECT></font></TD>
     </TR>
   <TR>
     <TD width="20%" bgcolor="#6699CC" align="center"><b>
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ºØ±Ú¬Û¹ï¼vÅT</font></b></TD>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ç¨®æ—ç›¸å°å½±éŸ¿</font></b></TD>
     <TD width="108%" colspan="2" bgcolor="#EFF3F7">
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><SELECT size=1 name=kind>
-        <OPTION value=1>§ğÀ»ªÌ¥ş«g®Á¥´ªÌ</OPTION> <OPTION value=2>§ğÀ»ªÌ¥b«g®Á¥´ªÌ</OPTION>
-        <OPTION value=3 selected>Âù¤è¤£¬Û«g</OPTION> <OPTION
-        value=4>®Á¥´ªÌ¥b«g§ğÀ»ªÌ</OPTION> <OPTION value=5>®Á¥´ªÌ¥ş«g§ğÀ»ªÌ</OPTION></SELECT></font></TD>
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><SELECT size=1 name=kind>
+        <OPTION value=1>æ”»æ“Šè€…å…¨å‰‹æŒ¨æ‰“è€…</OPTION> <OPTION value=2>æ”»æ“Šè€…åŠå‰‹æŒ¨æ‰“è€…</OPTION>
+        <OPTION value=3 selected>é›™æ–¹ä¸ç›¸å‰‹</OPTION> <OPTION
+        value=4>æŒ¨æ‰“è€…åŠå‰‹æ”»æ“Šè€…</OPTION> <OPTION value=5>æŒ¨æ‰“è€…å…¨å‰‹æ”»æ“Šè€…</OPTION></SELECT></font></TD>
     </TR>
   <TR>
     <TD width="20%" bgcolor="#6699CC" align="center"><b>
-    <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤ô´¹Äİ©Ê¼vÅT</font></b></TD>
+    <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ°´æ™¶å±¬æ€§å½±éŸ¿</font></b></TD>
     <TD width="108%" colspan="2" bgcolor="#EFF3F7">
-    <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë"><SELECT size=1 name=porn>
-        <OPTION value=1 selected>§ğÀ»ªÌ«g³Q§ğÀ»ªÌ</OPTION> <OPTION
-        value=2>³Q§ğÀ»ªÌ«g§ğÀ»ªÌ</OPTION></SELECT> <INPUT size=4 value=0 name=extn></span></font><FONT
-      color=red face="·s²Ó©úÅé" style="font-size: ¤@¯ë">%</FONT></TD>
+    <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬"><SELECT size=1 name=porn>
+        <OPTION value=1 selected>æ”»æ“Šè€…å‰‹è¢«æ”»æ“Šè€…</OPTION> <OPTION
+        value=2>è¢«æ”»æ“Šè€…å‰‹æ”»æ“Šè€…</OPTION></SELECT> <INPUT size=4 value=0 name=extn></span></font><FONT
+      color=red face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">%</FONT></TD>
     </TR>
   <TR>
     <TD width="153%" colSpan=3 bgcolor="#6699CC" align="center">
-      <CENTER><font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><INPUT onclick=Phoenix() type=button value=­pºâ·l¶Ë name=calculate></font></CENTER></TD></TR>
+      <CENTER><font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><INPUT onclick=Phoenix() type=button value=è¨ˆç®—æå‚· name=calculate></font></CENTER></TD></TR>
   <TR>
     <TD width="20%" bgcolor="#6699CC" align="center">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><b>²z½×¶Ë®`­È</b></font></TD>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><b>ç†è«–å‚·å®³å€¼</b></font></TD>
     <TD width="133%" colSpan=2 bgcolor="#EFF3F7">
       <CENTER>
       <p style="margin-top: 0; margin-bottom: 0">
-      <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë"><INPUT size=4 name=damage90> <INPUT size=4 name=damage91> <INPUT
+      <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬"><INPUT size=4 name=damage90> <INPUT size=4 name=damage91> <INPUT
       size=4 name=damage92> <INPUT size=4 name=damage93> <INPUT size=4
       name=damage94> <INPUT size=4 name=damage95> <INPUT size=4 name=damage96>
       <INPUT size=4 name=damage97> <INPUT size=4 name=damage98> <INPUT size=4
@@ -387,169 +387,169 @@ name=damage110></span></font></p>
             <tr>
               <td width="100%" colspan="5" bgcolor="#6699CC" bordercolor="#6699CC">
               <p align="center">
-            <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ºØ±Ú¬Û«gªí</font></td>
+            <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ç¨®æ—ç›¸å‰‹è¡¨</font></td>
             </tr>
             <tr>
-            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">¡@</td>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">ã€€</td>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¥ş«g</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">å…¨å‰‹</font></td>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¥b«g</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">åŠå‰‹</font></td>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³Q¥ş«g</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">è¢«å…¨å‰‹</font></td>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³Q¥b«g</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">è¢«åŠå‰‹</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">Às¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é¾ç³»</font></td>
       <td width="10%" align="center" bgcolor="#EFF3F7" height="13">
-      <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">­¸¦æ¨t</font></td>
+      <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é£›è¡Œç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³¥Ã~¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡ç¸ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ª÷Äİ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡‘å±¬ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¯S®í¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ç‰¹æ®Šç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">­¸¦æ¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é£›è¡Œç³»</font></td>
       <td width="10%" align="center" bgcolor="#EFF3F7" height="11">
-      <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">©øÂÎ¨t</font></td>
+      <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ˜†èŸ²ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤£¦º¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ä¸æ­»ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">Às¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é¾ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³¥Ã~¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡ç¸ç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">©øÂÎ¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ˜†èŸ²ç³»</font></td>
       <td width="10%" align="center" bgcolor="#EFF3F7" height="13">
-      <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¯S®í¨t</font></td>
+      <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ç‰¹æ®Šç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">´Óª«¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ¤ç‰©ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">­¸¦æ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é£›è¡Œç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤H«¬¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">äººå‹ç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¯S®í¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ç‰¹æ®Šç³»</font></td>
       <td width="10%" align="center" bgcolor="#EFF3F7" height="13">
-      <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ª÷Äİ¨t</font></td>
+      <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡‘å±¬ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">Às¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é¾ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">©øÂÎ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ˜†èŸ²ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">´Óª«¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ¤ç‰©ç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ª÷Äİ¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡‘å±¬ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">Às¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é¾ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤H«¬¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">äººå‹ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¯S®í¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ç‰¹æ®Šç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤£¦º¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ä¸æ­»ç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤£¦º¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ä¸æ­»ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤H«¬¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">äººå‹ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ª÷Äİ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡‘å±¬ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">´Óª«¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ¤ç‰©ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">­¸¦æ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é£›è¡Œç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤H«¬¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">äººå‹ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³¥Ã~¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡ç¸ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">©øÂÎ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ˜†èŸ²ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤£¦º¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ä¸æ­»ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">ª÷Äİ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡‘å±¬ç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³¥Ã~¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡ç¸ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">´Óª«¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ¤ç‰©ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">­¸¦æ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é£›è¡Œç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤H«¬¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">äººå‹ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">Às¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é¾ç³»</font></td>
             </tr>
             <tr>
             <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
-      <font color="#FFFFFF" face="·s²Ó©úÅé" style="font-size: ¤@¯ë">´Óª«¨t</font></td>
+      <font color="#FFFFFF" face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ¤ç‰©ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¤£¦º¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ä¸æ­»ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">¯S®í¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">ç‰¹æ®Šç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">³¥Ã~¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">é‡ç¸ç³»</font></td>
             <td width="10%" bgcolor="#EFF3F7" align="center">
-            <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">©øÂÎ¨t</font></td>
+            <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">æ˜†èŸ²ç³»</font></td>
             </tr>
           </table>
           </td>
           <td width="50%" bgcolor="#EFF3F7">
           <p style="margin-top: 0; margin-bottom: 0">
-          <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë">¤ô´¹Äİ©Ê¶Ë®`­Èªº­pºâ¦¡¡G</span></font><span style="font-size: ¤@¯ë"></p>
-          <p style="margin-top: 0; margin-bottom: 0"><font face="·s²Ó©úÅé">¦a¡÷¤ô¡÷¤õ¡÷­·¡÷¦a</font></p>
-          <p style="margin-top: 0; margin-bottom: 0"><font face="·s²Ó©úÅé">( «g x ³Q«g )+( ³Q«g x «g) =
-          ¼vÅT¦Ê¤À¤ñ</font></p>
-          <p style="margin-top: 0; margin-bottom: 0"><font face="·s²Ó©úÅé">¨Ò¡G<font color="#FF0000">¤õ3­·7
-          ¡÷ ­·8¦a2<br>
-          ¤õ«g­·¡J3 x 8 = 24% <br>
-          ­·«g¦a¡G7 x 2 = 14% <br>
-          ­è¦n¨âºØÄİ©Ê³£«g¨ì¡AÁ`¤ô´¹Äİ©Ê¦Ê¤À¤ñ¬° 24% + 14% = 38%</font></font></p>
-          <p style="margin-top: 0; margin-bottom: 0"><font face="·s²Ó©úÅé"><font color="#ff0000">¤õ3</font><font color="#FF0000">­·7
-          ¡÷ ¤ô6</font><font color="#ff0000">¤õ4</font><font color="#FF0000"><br>
-          ¤õ³Q¤ô«g¡G(-3) x 6 = -18%<br>
-          ­·³Q¤õ«g¡G(-7) x 4 = -28%<br>
-          ¦]¬°¨âºØÄİ©Ê³£³Q«g¨ì¡AÁ`¤ô´¹Äİ©Ê¦Ê¤À¤ñ¬° (-18%) - 28% = -46%</font></font></td>
+          <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬">æ°´æ™¶å±¬æ€§å‚·å®³å€¼çš„è¨ˆç®—å¼ï¼š</span></font><span style="font-size: ä¸€èˆ¬"></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="æ–°ç´°æ˜é«”">åœ°â†’æ°´â†’ç«â†’é¢¨â†’åœ°</font></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="æ–°ç´°æ˜é«”">( å‰‹ x è¢«å‰‹ )+( è¢«å‰‹ x å‰‹) =
+          å½±éŸ¿ç™¾åˆ†æ¯”</font></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="æ–°ç´°æ˜é«”">ä¾‹ï¼š<font color="#FF0000">ç«3é¢¨7
+          â†’ é¢¨8åœ°2<br>
+          ç«å‰‹é¢¨ï¸°3 x 8 = 24% <br>
+          é¢¨å‰‹åœ°ï¼š7 x 2 = 14% <br>
+          å‰›å¥½å…©ç¨®å±¬æ€§éƒ½å‰‹åˆ°ï¼Œç¸½æ°´æ™¶å±¬æ€§ç™¾åˆ†æ¯”ç‚º 24% + 14% = 38%</font></font></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="æ–°ç´°æ˜é«”"><font color="#ff0000">ç«3</font><font color="#FF0000">é¢¨7
+          â†’ æ°´6</font><font color="#ff0000">ç«4</font><font color="#FF0000"><br>
+          ç«è¢«æ°´å‰‹ï¼š(-3) x 6 = -18%<br>
+          é¢¨è¢«ç«å‰‹ï¼š(-7) x 4 = -28%<br>
+          å› ç‚ºå…©ç¨®å±¬æ€§éƒ½è¢«å‰‹åˆ°ï¼Œç¸½æ°´æ™¶å±¬æ€§ç™¾åˆ†æ¯”ç‚º (-18%) - 28% = -46%</font></font></td>
         </tr>
         <tr>
           <td width="50%" bgcolor="#EFF3F7"></span><font color="blue">
-          <span style="font-size: ¤@¯ë">
+          <span style="font-size: ä¸€èˆ¬">
           <p align="center" style="margin-top: 0; margin-bottom: 0">
-          <font face="·s²Ó©úÅé">
-          <font style="font-size: ¤@¯ë">¡·­ìµÛ¡G¤Ú«¢©i¯S¡]Wraith¡^¡·</font> </font> </p>
+          <font face="æ–°ç´°æ˜é«”">
+          <font style="font-size: ä¸€èˆ¬">â—åŸè‘—ï¼šå·´å“ˆå§†ç‰¹ï¼ˆWraithï¼‰â—</font> </font> </p>
           <p style="MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px" align="center">
           </span>
-          <font face="·s²Ó©úÅé" style="font-size: ¤@¯ë"><span style="font-size: ¤@¯ë">¡·­×§ï¡G¤Ú«¢©i¯S¡]diablo1974¡^¡·</span></font></font></td>
+          <font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬"><span style="font-size: ä¸€èˆ¬">â—ä¿®æ”¹ï¼šå·´å“ˆå§†ç‰¹ï¼ˆdiablo1974ï¼‰â—</span></font></font></td>
         </tr>
       </table>
     </TD></TR></TBODY></TABLE><FONT color=green> </CENTER></FORM>
 <DIV id=waterMark style="POSITION: absolute" align=center>
-<DD><font face="·s²Ó©úÅé" style="font-size: ¤@¯ë">&nbsp;</font></DD></DIV>
+<DD><font face="æ–°ç´°æ˜é«”" style="font-size: ä¸€èˆ¬">&nbsp;</font></DD></DIV>
 <SCRIPT language=JavaScript1.2>
 <!--
 // Watermark script by Paul Anderson, CNET Builder.com. All rights reserved.
 
-markW = 77; // ¹ÏÀÉªº¼e
-markH = 99; // ¹ÏÀÉªºªø
-markX = 90; // ¿Ã¹õ¤WX¶bªº¦ì¸m
-markY = 95; // ¿Ã¹õ¤WY¶bªº¦ì¸m
-markRefresh = 20; // ¨C´X¤d¤À¤§¤@¬í­«·s©w¦ì
+markW = 77; // åœ–æª”çš„å¯¬
+markH = 99; // åœ–æª”çš„é•·
+markX = 90; // è¢å¹•ä¸ŠXè»¸çš„ä½ç½®
+markY = 95; // è¢å¹•ä¸ŠYè»¸çš„ä½ç½®
+markRefresh = 20; // æ¯å¹¾åƒåˆ†ä¹‹ä¸€ç§’é‡æ–°å®šä½
 
 // set common object reference
 if (!document.all) document.all = document;
@@ -592,6 +592,6 @@ window.onload=markMe; // safety for Mac IE4.5
 </FONT>
 <p style="margin-top: 0; margin-bottom: 0" align="center"><b>
 <font face="serif" color="#000000">&copy; 2003 Revelation' book of&nbsp; , All rights 
-reserved .</font></b><font color="#FFFFFF"><b><font face="serif" style="font-size: ¤@¯ë">'</font></b></font></p>
+reserved .</font></b><font color="#FFFFFF"><b><font face="serif" style="font-size: ä¸€èˆ¬">'</font></b></font></p>
 
 </BODY></HTML>
