@@ -1,0 +1,36 @@
+BODY {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+TD {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+FORM {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+INPUT {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+OPTION {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+SELECT {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+textare {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+P {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+OL {
+	FONT-SIZE: 10pt; FONT-FAMILY: 新細明體,Arial
+}
+A:link {
+	FONT-SIZE: 10pt; COLOR: #0066FF; TEXT-DECORATION: none
+}
+A:visited {
+	FONT-SIZE: 10pt; COLOR: #0066FF; TEXT-DECORATION: none
+}
+A:hover {
+	FONT-SIZE: 10pt; COLOR: #FFFFFF; BACKGROUND-COLOR: #6699CC; TEXT-DECORATION: none
+}

@@ -1,0 +1,1162 @@
+<HTML>
+<HEAD>
+<TITLE>寵物計算機</TITLE>
+
+<STYLE type="text/css">
+
+</STYLE>
+
+<SCRIPT language="JavaScript">
+<!--
+//TO DO LIST:
+//get rid of extra space on the right out calc table
+//group all language specific strings together
+//fix up messy array structure
+//allow ordering, perhaps multi-lv (2 is enough?)
+//append string at beginning of each invalid/no solution input line to identify them as such
+//* Implement non-lv1 calculations
+//* Sim
+//* Detailed Data (location, attribute, eff/non-eff against etc)
+//Random Generate xx num of particular choice - add to textarea field
+//* Testing input list to see fit for which ptTypes?
+//*ranking of different races?
+
+//How to deal with padding?
+// - check length of max, pad all other based on this limit,
+// - finally concatenate all pieces of the string together
+//Should I check for total length? If length too long, remove padding accordingly
+// - need to able to choose from "&nbsp|&nbsp" or "|"
+
+//each solution can have a probability
+//***listing probability will severely restrict spacing*** ' 78%' <- take 4 spaces
+//to accommodate this, must rid of commas
+//to calculate probability, need expand each set of solutions, then tally
+//probability of the subsets.
+
+//option to print/calculate probability and BPSum
+
+// var           var                var??        var        fixed       fixed
+//[ord] [        stat          ] | [  BP   ] |[minL~maxL]| [cfloss]  | [maxLoss]
+//  #9: 102 168 40 39 29 103 100 | 5 6 5 3 1 |  -8 ~  -9 | 0,0,1,0,0 | 4,4,4,4,4
+// #10: 103 170 40 38 30 103 100 | 5 6 4 3 1 |  -7 ~  -8 | 0,0,3,0,0 | 4,4,4,4,4
+// #11:  97  75 40 38 30 103 100 | 4 6 4 3 2 |  -8 ~  -9 | 3,0,3,0,0 | 4,2,4,2,2
+
+//How much data does any given pt has?
+//race, BPCl are global
+//order, stat[5], spi, rev, BP[5], lossMin, lossMax, cfLossSummary, maxLossSummary,
+//and list of solutions[n], anything else? grIndexMax grIndexMin
+//no need variable to store num of solution, just check solution length.
+
+//write a method to compare two sets of stats?
+
+//for each solution, need list class[5], loss, cfLoss[5] and maxLoss[5]
+//stat[5], spi, rev and BP[5] are derived, later printed to 2 decide places
+function sol(classes, grIndex) {
+  this.gr = grIndex
+  this.cl = new Array(5)
+  for (var cla in classes) this.cl[cla] = classes[cla]
+  //formula is: (baseBP+(40+gr)/1000*(level-1)), gr=0,1,2,3,4,5
+  solBase = (base*1000 + (40 + this.gr)*(level-1))/1000
+  this.BP = new Array(5)
+  this.stat = new Array(5)
+  this.loss = undefined
+  this.cfLoss = new Array(0,0,0,0,0)
+  this.maxLoss = new Array(5)
+  for (var ba in this.cl) {
+    this.BP[ba] = this.cl[ba]*solBase
+    this.stat[ba] = stat(ba,this.cl)*solBase+20
+  }
+  this.spi = spi(this.cl)*solBase + 100
+  this.rev = rev(this.cl)*solBase + 100
+  return this
+}
+
+//stats are stored with base 20 removed
+//BP and rec/spi are optional, and checked against if inputed
+//only integer values matter
+function pt(values) {
+  var vLen = values.length
+  doCheckBP = false
+  if (values[0]==undefined || vLen<5) return this
+  this.sols = new Array()
+  this.stat = new Array(5)
+  for (var j=0;j<5;j++) this.stat[j] = values[j]-20
+  if (vLen>5 && vLen<10) {
+    this.spi = values[5]
+    if (vLen>6) this.rev = values[6]
+    return this
+  }
+  //if length is  6, assume stat + spi
+  //if length is  7, assume stat + spi + rev
+  //if length is  8 or 9, only consider first 7
+  //if length is 10, assume stat + BP,
+  //if length is 11, assume stat + spi + BP (!!!could be stat + BP + BPSum!!)
+  //could be stat+bp+ (-x~-x)
+  //if length is 12, assume stat + spi + rev + BP(!!!could be stat + spi + BP + BPSum!!!)
+  //could be stat+bp+ (-x~-x)
+  //if length is 13, assume stat + spi + rev + BP + BPSum
+  //if length is over 12, only consider first 12
+  //move can be calculated by -10 from vLen, then set max to 2
+  if (vLen>=10) {
+    doCheckBP = true
+    var move = Math.min(vLen-10,2) + 5
+    if (vLen==11 || vLen==12) {
+      //assumed values[5] is spi, now check assumption (move is now 6)
+      //assumption is WRONG if last number equates to sum of the 5 numbers before it
+      var sum = 0
+      for (var j=(vLen-6);j<(vLen-1);j++) sum+=values[move+j]
+      if (sum==values[vLen-1]) move--
+      else if (values[5] > 20) {
+        this.spi = values[5]
+        if (vLen==12) this.rev=values[6]
+      }
+      else {
+        move-= (vLen-10)
+      }
+    }
+    if (vLen>11 && values[5]>20) this.spi = values[5]
+    if (vLen>12 && values[6]>20) this.rev = values[6] //assume stat+spi+rev+BP+rubbish
+    this.BP = new Array(5)
+    for (var b=0;b<5;b++) this.BP[b] = values[b+move]
+  }
+  return this
+}
+
+
+// here starts some horrible programming
+// re:
+// 0 is stat given
+// 1 indicate whether solution exist
+// 2 is lossMin
+// 3 is lossMax
+// 4 is cfLossSummary
+// 5 is maxLossSummary
+// 6 is array of cor solutions
+// 6[a][0][0~4] is class for solution a
+// 6[a][1] is total loss for solution a
+// 6[a][2][0~4] is cfLoss for solution a
+// 6[a][3][0~4] is maxLoss for solution a
+
+var o = "" //output of calculation
+Pts = new Array(
+  new Array(1,"虎人",0,22,26,17,19,16),
+  new Array(2,"貓妖",0,19,24,17,28,17),
+  new Array(3,"羅剎",0,24,25,14,22,20),
+  new Array(4,"貓人",0,23,27,15,26,14),
+  new Array(5,"惡魔貓",0,21,23,12,27,22),
+  new Array(6,"妖狐",0,18,30,11,25,26),
+  new Array(7,"穴熊",0,34,34,19,19,14),
+  new Array(8,"赤熊",0,35,36,15,20,14),
+  new Array(9,"北極熊",0,36,33,22,18,11),
+  new Array(10,"赤目黑熊",0,33,35,14,22,16),
+  new Array(11,"貓熊",0,32,40,18,17,18),
+  new Array(12,"大地鼠",0,6,13,20,26,35),
+  new Array(13,"惡夢鼠",0,4,8,18,33,37),
+  new Array(14,"火焰鼠",0,7,12,15,34,32),
+  new Array(15,"寶石鼠",0,7,7,22,27,37),
+  new Array(16,"水藍鼠",0,11,15,28,28,33),
+  new Array(17,"鼠王",0,15,7,19,32,42),
+  new Array(18,"地獄看門犬",0,26,36,12,23,18),
+  new Array(19,"巨狼",0,22,37,11,25,20),
+  new Array(20,"地獄獵犬",0,24,35,19,22,15),
+  new Array(21,"地獄妖犬",0,23,40,13,21,18),
+  new Array(22,"殭屍",1,37,32,12,12,12),
+  new Array(23,"喪屍",1,35,34,7,15,14),
+  new Array(24,"食屍鬼",1,32,32,17,7,17),
+  new Array(25,"腐屍",1,42,37,12,7,7),
+  new Array(26,"木乃伊",1,39,32,14,8,17),
+  new Array(27,"骷髏戰士",1,12,27,42,12,17),
+  new Array(28,"血骷髏",1,13,24,41,10,22),
+  new Array(29,"地獄骷髏",1,14,30,40,11,15),
+  new Array(30,"武裝骷髏",1,9,26,47,8,20),
+  new Array(31,"骷髏海盜",1,12,29,45,13,16),
+  new Array(32,"幽靈",1,19,18,31,20,27),
+  new Array(33,"鬼靈",1,9,21,27,25,33),
+  new Array(34,"亡靈",1,14,27,30,15,29),
+  new Array(35,"死靈",1,10,28,32,17,28),
+  new Array(36,"小石像怪",2,16,21,11,31,26),
+  new Array(37,"使魔",2,21,20,15,27,27),
+  new Array(38,"水藍鳥魔",2,22,23,10,25,25),
+  new Array(39,"小惡魔",2,21,20,9,25,30),
+  new Array(40,"迷你石像怪",2,23,19,10,24,29),
+  new Array(41,"丘比特",2,12,22,7,37,37),
+  new Array(42,"石像怪",2,14,30,32,22,22),
+  new Array(43,"血魔",2,13,31,26,25,25),
+  new Array(44,"墮天使",2,11,28,28,27,26),
+  new Array(45,"惡魔",2,10,27,26,26,31),
+  new Array(46,"小蝙蝠",2,11,26,16,31,21),
+  new Array(47,"掃把蝙蝠",2,13,28,12,29,18),
+  new Array(48,"迷你蝙蝠",2,11,26,20,27,16),
+  new Array(49,"水果蝙蝠",2,17,25,15,26,17),
+  new Array(50,"惡魔蝙蝠",2,13,34,10,29,24),
+  new Array(51,"天使蝙蝠",2,9,22,12,37,30),
+  new Array(52,"大蝙蝠",2,23,28,23,28,13),
+  new Array(53,"巨蝙蝠",2,27,30,22,24,12),
+  new Array(54,"海蝙蝠",2,18,29,27,30,11),
+  new Array(55,"胖蝙蝠",2,25,24,20,26,20),
+  new Array(56,"兔耳蝙蝠",2,21,26,18,31,14),
+  new Array(57,"藍蠍",3,20,27,47,13,8),
+  new Array(58,"紅蠍",3,19,28,42,19,7),
+  new Array(59,"黃蠍",3,20,30,43,12,10),
+  new Array(60,"殺手蠍",3,30,29,38,11,7),
+  new Array(61,"殺人蜂",3,12,37,12,37,12),
+  new Array(62,"異型蜂",3,14,33,11,35,17),
+  new Array(63,"虎頭蜂",3,13,40,8,38,11),
+  new Array(64,"黃蜂",3,10,38,13,43,6),
+  new Array(65,"死亡蜂",3,7,39,15,41,8),
+  new Array(66,"螳螂",3,16,44,22,27,11),
+  new Array(67,"殺人螳螂",3,12,45,20,26,17),
+  new Array(68,"赤目螳螂",3,14,44,19,29,14),
+  new Array(69,"死灰螳螂",3,15,40,17,33,15),
+  new Array(70,"致命螳螂",3,20,43,18,27,12),
+  new Array(71,"土蜘蛛",3,26,15,18,23,23),
+  new Array(72,"水蜘蛛",3,24,16,17,20,28),
+  new Array(73,"火蜘蛛",3,22,22,16,25,20),
+  new Array(74,"風蜘蛛",3,25,28,15,19,18),
+  new Array(75,"樹精",4,32,17,32,12,17),
+  new Array(76,"死亡樹精",4,28,20,37,9,16),
+  new Array(77,"黃金樹精",4,38,22,28,10,17),
+  new Array(78,"慘白樹精",4,29,16,28,17,20),
+  new Array(79,"冰冷樹精",4,30,15,27,16,22),
+  new Array(80,"沼澤樹精",4,31,14,29,15,21),
+  new Array(81,"妖草",4,26,11,16,16,36),
+  new Array(82,"蔓陀羅草",4,25,13,14,15,38),
+  new Array(83,"妖花",4,27,12,12,19,35),
+  new Array(84,"人魔草",4,22,17,11,14,41),
+  new Array(85,"綠色口臭鬼",4,38,23,16,15,23),
+  new Array(86,"黃色口臭鬼",4,37,27,18,11,22),
+  new Array(87,"藍色口臭鬼",4,35,25,15,18,27),
+  new Array(88,"紅色口臭鬼",4,44,21,14,12,29),
+  new Array(89,"兇暴仙人掌",4,27,29,22,12,20),
+  new Array(90,"武術仙人掌",4,24,32,27,10,17),
+  new Array(91,"兔耳仙人掌",4,28,35,19,14,14),
+  new Array(92,"印地安仙人掌",4,26,36,24,9,15),
+  new Array(93,"火焰舞者",4,19,38,18,15,25),
+  new Array(94,"史萊姆",5,46,26,11,6,16),
+  new Array(95,"液態史萊姆",5,49,24,15,5,12),
+  new Array(96,"果凍史萊姆",5,45,31,6,10,13),
+  new Array(97,"布丁史萊姆",5,40,25,12,8,20),
+  new Array(98,"火精",5,25,25,25,25,25),
+  new Array(99,"風精",5,25,25,25,25,25),
+  new Array(100,"水精",5,25,25,25,25,25),
+  new Array(101,"地精",5,25,25,25,25,25),
+  new Array(102,"頑皮炸彈",5,15,15,15,15,40),
+  new Array(103,"寶貝炸彈",5,14,17,11,16,42),
+  new Array(104,"大炸彈",5,12,20,14,14,40),
+  new Array(105,"漂浮炸彈",5,16,14,14,17,39),
+  new Array(106,"丸子炸彈",5,17,17,7,17,47),
+  new Array(107,"幻影",5,20,26,25,17,32),
+  new Array(108,"旋律影子",5,24,28,22,19,27),
+  new Array(109,"闇影",5,25,23,23,23,26),
+  new Array(110,"陰影",5,28,24,22,22,24),
+  new Array(111,"血腥之刃",6,9,39,34,14,24),
+  new Array(112,"殺龍之刃",6,17,37,41,11,19),
+  new Array(113,"火焰之刃",6,10,39,28,12,31),
+  new Array(114,"烈風之刃",6,12,44,29,13,27),
+  new Array(115,"嚇人箱",6,11,26,26,11,31),
+  new Array(116,"兔耳嚇人箱",6,9,24,23,16,33),
+  new Array(117,"紅魔嚇人箱",6,12,32,27,12,27),
+  new Array(118,"藍魔嚇人箱",6,15,37,28,8,22),
+  new Array(119,"綠蛙嚇人箱",6,13,35,29,10,23),
+  new Array(120,"純白嚇人箱",6,9,24,29,11,37),
+  new Array(121,"冰怪",6,20,30,46,7,12),
+  new Array(122,"石怪",6,15,38,43,6,13),
+  new Array(123,"銀怪",6,10,32,48,8,17),
+  new Array(124,"金怪",6,14,41,40,5,15),
+  new Array(125,"惡魔螃蟹",6,16,32,35,11,11),
+  new Array(126,"水晶螃蟹",6,18,31,36,10,10),
+  new Array(127,"鐵剪螃蟹",6,14,34,37,12,8),
+  new Array(128,"黃金螃蟹",6,22,30,34,7,12),
+  new Array(129,"蜥蜴戰士",7,22,32,32,12,12),
+  new Array(130,"蜥蜴鬥士",7,18,37,37,8,10),
+  new Array(131,"蜥蝪武士",7,20,31,30,15,14),
+  new Array(132,"獵豹蜥蜴",7,23,36,28,10,13),
+  new Array(133,"大地翼龍",7,29,28,32,20,11),
+  new Array(134,"寒冰翼龍",7,30,30,31,17,12),
+  new Array(135,"火焰翼龍",7,33,33,25,16,13),
+  new Array(136,"烈風翼龍",7,32,30,23,20,15),
+  new Array(137,"翼龍",7,32,30,26,19,18),
+  new Array(138,"地龍蜥",7,29,34,34,15,8),
+  new Array(139,"水龍蜥",7,36,38,34,11,6),
+  new Array(140,"火龍蜥",7,32,37,37,12,7),
+  new Array(141,"風龍蜥",7,35,35,31,10,9),
+  new Array(142,"哥布林",8,27,27,27,17,7),
+  new Array(143,"紅帽哥布林",8,23,30,29,20,5),
+  new Array(144,"火焰哥布林",8,22,28,26,15,14),
+  new Array(145,"烈風哥布林",8,30,26,24,23,4),
+  new Array(146,"巨人",8,38,35,24,9,14),
+  new Array(147,"單眼巨人",8,34,34,20,12,20),
+  new Array(148,"泰坦巨人",8,39,30,28,8,15),
+  new Array(149,"亞特拉斯巨神",8,37,37,17,17,12),
+  new Array(150,"盜賊",8,23,28,21,31,12),
+  new Array(151,"山賊",8,28,27,24,26,10),
+  new Array(152,"海盜",8,19,31,23,28,14),
+  new Array(153,"破壞狂",8,27,26,30,24,8),
+  new Array(154,"鳥人",8,17,17,17,37,22),
+  new Array(155,"幻歌妖",8,15,18,20,38,19),
+  new Array(156,"狠毒鳥人",8,18,19,14,39,20),
+  new Array(157,"烈風鳥人",8,13,20,12,42,23),
+  new Array(158,"黑暗鳥人",8,19,11,11,43,31),
+  new Array(159,"山飛甲",0,27,21,15,30,27),
+  new Array(160,"獨角獸",0,17,25,13,28,37),
+  new Array(161,"天馬",0,22,22,12,32,32),
+  new Array(162,"麒麟",0,19,27,10,34,30),
+  new Array(163,"地底龜",0,22,22,37,10,19),
+  new Array(164,"海底龜",0,23,20,45,4,18),
+  new Array(165,"火焰龜",0,27,17,42,7,17),
+  new Array(166,"硬殼龜",0,26,16,47,5,16),
+  new Array(167,"鐮刀魔",1,23,35,18,17,32),
+  new Array(168,"暗黑僧侶",1,17,37,22,12,37),
+  new Array(169,"斬首者",1,19,42,20,15,29),
+  new Array(170,"冥界死神",1,25,40,12,21,27),
+  new Array(171,"牙骨",1,27,32,32,12,7),
+  new Array(172,"顎牙",1,32,29,37,7,5),
+  new Array(173,"巨牙",1,25,30,27,17,11),
+  new Array(174,"利牙",1,30,37,30,9,4),
+  new Array(175,"獅鷲獸",2,22,32,12,42,17),
+  new Array(176,"變種獅鷲獸",2,26,29,15,39,16),
+  new Array(177,"布雷歐",2,20,34,9,47,15),
+  new Array(178,"依格羅斯",2,18,36,11,44,16),
+  new Array(179,"托羅帝鳥",2,32,20,13,35,10),
+  new Array(180,"岩地跑者",2,27,22,17,32,12),
+  new Array(181,"火焰啄木鳥",2,22,27,19,29,13),
+  new Array(182,"狂奔鳥",2,25,24,18,36,7),
+  new Array(183,"甲蟲",3,17,37,32,12,17),
+  new Array(184,"掘地蟲",3,20,35,36,8,16),
+  new Array(185,"鍬型蟲",3,15,39,29,14,18),
+  new Array(186,"獨角仙",3,18,41,34,9,14),
+  new Array(187,"翠綠菇",4,37,12,12,17,37),
+  new Array(188,"水藍菇",4,38,15,13,15,34),
+  new Array(189,"粉紅菇",4,35,10,15,14,41),
+  new Array(190,"星菇",4,40,13,10,13,39),
+  new Array(191,"綠煙",5,20,20,14,25,36),
+  new Array(192,"煙霧",5,23,23,8,30,31),
+  new Array(193,"煙羅",5,22,22,12,27,32),
+  new Array(194,"棉球",5,25,26,9,25,30),
+  new Array(195,"盾",6,15,15,45,15,30),
+  new Array(196,"潛盾",6,17,12,47,12,32),
+  new Array(197,"強盾",6,19,13,49,11,28),
+  new Array(198,"神盾",6,16,9,50,8,37),
+  new Array(199,"岩怪",6,29,22,40,5,14),
+  new Array(200,"爆岩",6,30,20,42,6,12),
+  new Array(201,"熔岩",6,32,17,37,7,17),
+  new Array(202,"影岩",6,31,15,32,12,20),
+  new Array(203,"希特拉",7,42,42,27,7,7),
+  new Array(204,"蛟龍",7,40,44,25,8,8),
+  new Array(205,"埃及眼鏡蛇",7,38,45,30,6,6),
+  new Array(206,"八岐大蛇",7,46,46,23,5,5),
+  new Array(207,"口袋龍",7,15,34,21,20,25),
+  new Array(208,"迷你龍",7,10,35,23,21,26),
+  new Array(209,"雛龍",7,12,32,22,22,27),
+  new Array(210,"穴龍",7,11,31,20,25,28),
+  new Array(211,"大型半獸人",8,34,25,35,10,11),
+  new Array(212,"豬鬼",8,33,28,33,11,10),
+  new Array(213,"鋼鬼",8,30,30,30,16,9),
+  new Array(214,"半獸人",8,32,27,32,12,12),
+  new Array(215,"陸行鯊",2,18,7,23,8,7),
+  new Array(216,"沙地鯊",2,23,13,28,13,8),
+  new Array(217,"丘陵鯊",2,18,8,18,23,7),
+  new Array(218,"岩石鯊",2,28,18,23,13,18),
+  new Array(219,"雛鳥",2,7,4,3,28,33),
+  new Array(220,"鴨橋獸",2,7,8,7,23,23),
+  new Array(221,"小鴨子",2,2,23,2,18,33),
+  new Array(222,"小兔子",2,8,18,8,13,33),
+  new Array(223,"蛋白石怪",6,7,8,23,6,28),
+  new Array(224,"紅寶石怪",6,7,7,23,6,28),
+  new Array(225,"鑽石怪",6,7,13,28,6,28),
+  new Array(226,"水晶怪",6,18,8,33,6,43),
+  new Array(227,"刀雞",0,4,8,7,23,8),
+  new Array(228,"劍鴕鳥",0,7,18,8,23,13),
+  new Array(229,"大刀鴯苗",0,7,23,8,23,18),
+  new Array(230,"刀鋒阿姆鳥",0,7,28,8,23,23),
+  new Array(231,"火蜥蜴",7,23,8,8,8,18),
+  new Array(232,"毒蜥蜴",7,23,8,13,8,18),
+  new Array(233,"冰蜥蜴",7,26,11,34,7,27),
+  new Array(234,"金屬蜥蜴",7,23,13,23,7,7),
+  new Array(235,"戴靴怪",3,7,8,3,23,18),
+  new Array(236,"舞靴怪",3,7,13,13,23,18),
+  new Array(237,"潛靴怪",3,7,18,7,23,18),
+  new Array(238,"咚咚靴怪",3,7,23,13,23,18),
+  new Array(239,"大公雞",1,2,42,2,42,47),
+  new Array(240,"耶誕靴怪",3,7,24,13,17,7),
+  new Array(245,"鐵獅",0,19,40,11,30,5),
+  new Array(247,"跳跳地雷",6,30,18,16,8,33),
+  new Array(1255,"愛絲波波",5,34,35,18,19,14),
+  new Array(1022,"改造殭屍",1,41,36,16,16,16),
+  new Array(1072,"改造水蜘蛛",3,28,20,21,24,32),
+  new Array(1085,"改造綠色口臭鬼",4,40,25,18,17,25),
+  new Array(1108,"改造純白(旋律)",5,12,27,32,14,40),
+  new Array(1110,"改造兔耳(陰影)",5,29,25,23,23,25),
+  new Array(2255,"二改愛絲波波",5,37,37,22,22,17),
+  new Array(5208,"虛弱的雛鳥",2,5,5,5,5,5),
+  new Array(5004,"優奈",8,15,25,33,19,33),
+  new Array(6004,"小可愛優奈",8,28,28,28,28,28),
+  new Array(9001,"大地牛頭怪",9,22,27,22,27,12),
+  new Array(9002,"火焰牛頭怪",9,22,27,22,27,12),
+  new Array(9003,"寒冰牛頭怪",9,22,27,22,27,12),
+  new Array(9004,"烈風牛頭怪",9,22,27,22,27,12)
+  )
+
+calculated = false
+failure = false
+ptList = new Array()
+classCalcOpen = true
+oType = 1
+BPNameList = new Array('體','力','強','速','魔')
+raceNames = new Array('野獸系','不死系','飛行系','昆蟲系','植物系','特殊系','金屬系','龍型系','人型系','邪魔系')
+level=1
+base=0.2
+
+function loadMenu(menuIndex) {
+  with (document.choose.ptMenu) {
+    var itemNum=0
+    document.choose.ptMenu.options.length=0;
+    if (menuIndex==-1) {
+      for (var ptNum in Pts) options[ptNum]=new Option(Pts[ptNum][1],Pts[ptNum][0])
+    }
+    else {
+      for (var ptNum in Pts) {
+        if (Pts[ptNum][2]==menuIndex) {
+          options[itemNum]=new Option(Pts[ptNum][1],Pts[ptNum][0])
+          itemNum++
+        }
+      }
+    }
+    choose.ptMenu.options[0].selected=true
+    loadData()
+  }
+}
+
+function findPtType(menuItemIndex) {
+  menuItemIndex = parseInt(menuItemIndex)
+  if (Pts[menuItemIndex] && (Pts[menuItemIndex][0]==menuItemIndex)) return menuItemIndex
+  else for (var ptNum in Pts) if (Pts[ptNum][0] == menuItemIndex) return ptNum
+}
+
+function loadData() {
+  sets = new Array()
+  now = new Date()
+  if (choose.ptMenu.value<0) return
+  ptType = findPtType(choose.ptMenu.value)
+  oType = choose.outputType.value
+  level = parseInt(choose.ptLevel.value)
+  var dataText
+  dataText = "#"
+  for (var i in Pts[ptType]) {
+    dataText += Pts[ptType][i] + " "
+  }
+  //dataText = ''
+  //dataText = Math.floor(50*0.2+23*2.7+12*0.3+7*0.3+11*0.2)
+  //dataText = Math.floor(10+62.1+3.6+2.1+2.2)
+  choose.data.value = dataText
+}
+
+function calculate() {
+  ptType = undefined
+  loadData()
+  if (ptType==undefined) {
+    helpMessage()
+    return
+  }
+  index  = Pts[ptType][0]
+  name   = Pts[ptType][1]
+  race   = Pts[ptType][2]
+  base = 0.2
+  if (index == 37 || index == 46 || index == 9001 || index == 9002 || index == 9003 || index == 9004) {
+    base = 0.3
+  }
+  else if (index == 2255) {
+    base = 0.25
+  }
+  parseLines(choose.input.value)
+  li = 0
+  for (li in sets) {
+    parseLine(sets[li])
+  }
+  if (sets.length==0 || failure) {
+    calculated = true
+    failure = true
+    printTo('helpText','請依<b>血魔攻防敏 精回 體力強速魔</b>順序輸入寵物能力, 每行一隻寵, 然後按<b>開始計算</b>. 精神/回復/BP可以不填.')
+    return
+  }
+  if (choose.clearOutput.checked) o=''
+  output()
+  calculated = true
+  if (choose.clearInput.checked) choose.input.value=''
+  return
+}
+
+function parseLines(lines) {
+  var tempSets = lines.split(/\n/)
+  var j=0
+  for (var i in tempSets) {
+    tempSets[i] = tempSets[i].split(/[^0-9#]/)
+    var nums = new Array()
+    var m=0
+    for (var k in tempSets[i]) {
+      tempSets[i][k] = parseInt(tempSets[i][k])
+      if (!isNaN(tempSets[i][k])) {
+        nums[m] = tempSets[i][k]
+        m++
+      }
+    }
+    tempSets[i] = nums
+    if (tempSets[i].length>=5) {
+      sets[j] = tempSets[i]
+      j++
+    }
+  }
+}
+
+function parseLine(line) {
+  numOfResults = 0
+  BPClSum= 0
+  BPCl   = new Array()
+  BPMax  = new Array(5)
+  BPMin  = new Array(5)
+  cfLoss = new Array(0,0,0,0,0)
+  maxLoss = new Array()
+  totalLoss = 0
+  lossMin = 20
+  lossMax = 0
+  cfLossSummary = new Array(4,4,4,4,4)
+  maxLossSummary = new Array(0,0,0,0,0)
+  for (var b=0;b<5;b++) {
+    BPCl[b]  = Pts[ptType][b+3]
+    BPClSum = BPClSum + BPCl[b]
+  }
+  //shift entire array if it appears first number represents level
+  //this works up to lv 19
+  if (line.length>5 && line[0]<20 && line[1]>20) line.shift()
+  ptList[li] = new pt(line)
+  var p = ptList[li]
+
+//BEGIN INDEX USE
+var errorMargin = 3
+var loop = 6
+if (level==1) {
+  loop = 1
+  errorMargin = 0
+}
+for (var gr=0;gr<loop;gr++) {
+    for (var b=0;b<5;b++) {
+      BPMax[b] = Pts[ptType][b+3] + 10
+      BPMin[b] = Pts[ptType][b+3] - 4
+    }
+    baseBP = (base*1000+(40+gr)*(level-1))/1000
+    //add('baseBP = ' + baseBP + '<BR>')
+    if (p.BP) {
+      //formula is: (base+(40+gr)/1000*(level-1)), gr=0,1,2,3,4,5
+      for (var b in BPMax) {
+        BPMax[b] = Math.min(BPMax[b],Math.floor((p.BP[b]+1+errorMargin)/baseBP))
+        BPMin[b] = Math.max(BPMin[b],Math.ceil((p.BP[b]-errorMargin)/baseBP))
+      }
+    }
+    BPMax[0] = Math.min(BPMax[0],Math.floor((p.stat[0]+1+errorMargin)/8/baseBP))
+    BPMax[1] = Math.min(BPMax[1],Math.floor((p.stat[2]+1+errorMargin)/2.7/baseBP))
+    BPMax[2] = Math.min(BPMax[2],Math.floor((p.stat[3]+1+errorMargin)/3/baseBP))
+    BPMax[3] = Math.min(BPMax[3],Math.floor((p.stat[4]+1+errorMargin)/2/baseBP))
+    BPMax[4] = Math.min(BPMax[4],Math.floor((p.stat[1]+1+errorMargin)/10/baseBP))
+    //add('Early BPMax = ' + BPMax + '<BR>')
+    //add('Early BPMin = ' + BPMin + '<BR>')
+    var breaker = 0
+    while (true) {
+      breaker++
+      var total = 0
+      for (var q in BPMax) total = total+BPMax[q]-BPMin[q]
+      BPMin[0] = Math.min(BPMax[0],Math.max(BPMin[0],Math.ceil((p.stat[0]-errorMargin-(BPMax[1]*2+BPMax[2]*3+BPMax[3]*3+BPMax[4]*1)*baseBP)/8/baseBP)))
+      BPMin[1] = Math.min(BPMax[1],Math.max(BPMin[1],Math.ceil((p.stat[2]-errorMargin-(BPMax[0]*2+BPMax[2]*3+BPMax[3]*3+BPMax[4]*2)/10*baseBP)/2.7/baseBP)))
+      BPMin[2] = Math.min(BPMax[2],Math.max(BPMin[2],Math.ceil((p.stat[3]-errorMargin-(BPMax[0]*2+BPMax[1]*3+BPMax[3]*3+BPMax[4]*2)/10*baseBP)/3/baseBP)))
+      BPMin[3] = Math.min(BPMax[3],Math.max(BPMin[3],Math.ceil((p.stat[4]-errorMargin-(BPMax[0]*1+BPMax[1]*2+BPMax[2]*2+BPMax[4]*1)/10*baseBP)/2/baseBP)))
+      BPMin[4] = Math.min(BPMax[4],Math.max(BPMin[4],Math.ceil((p.stat[1]-errorMargin-(BPMax[0]*1+BPMax[1]*2+BPMax[2]*2+BPMax[3]*2)*baseBP)/10/baseBP)))
+      BPMax[0] = Math.max(BPMin[0],Math.min(BPMax[0],Math.floor(((p.stat[0]+1+errorMargin)-(BPMin[1]*2+BPMin[2]*3+BPMin[3]*3+BPMin[4]*1)*baseBP)/8/baseBP)))
+      BPMax[1] = Math.max(BPMin[1],Math.min(BPMax[1],Math.floor(((p.stat[2]+1+errorMargin)-(BPMin[0]*2+BPMin[2]*3+BPMin[3]*3+BPMin[4]*2)/10*baseBP)/2.7/baseBP)))
+      BPMax[2] = Math.max(BPMin[2],Math.min(BPMax[2],Math.floor(((p.stat[3]+1+errorMargin)-(BPMin[0]*2+BPMin[1]*3+BPMin[3]*3+BPMin[4]*2)/10*baseBP)/3/baseBP)))
+      BPMax[3] = Math.max(BPMin[3],Math.min(BPMax[3],Math.floor(((p.stat[4]+1+errorMargin)-(BPMin[0]*1+BPMin[1]*2+BPMin[2]*2+BPMin[4]*1)/10*baseBP)/2/baseBP)))
+      BPMax[4] = Math.max(BPMin[4],Math.min(BPMax[4],Math.floor(((p.stat[1]+1+errorMargin)-(BPMin[0]*1+BPMin[1]*2+BPMin[2]*2+BPMin[3]*2)*baseBP)/10/baseBP)))
+      for (var q in BPMax) total = total-BPMax[q]+BPMin[q]
+      if (total > 70 || total == 0 || breaker > 20) break;
+    }
+    //add('Gr    = ' + gr    + ' | ')
+    //add('BPMax = ' + BPMax + ' | ')
+    //add('BPMin = ' + BPMin + '<BR>')
+    for (var a=BPMin[0];a<=BPMax[0];a++) {
+      for (var b=BPMin[1];b<=BPMax[1];b++) {
+        for (var c=BPMin[2];c<=BPMax[2];c++) {
+          for (var d=BPMin[3];d<=BPMax[3];d++) {
+            for (var e=BPMin[4];e<=BPMax[4];e++) {
+              var cor = true
+              var combo = new Array(a,b,c,d,e)
+              for (var co in p.stat) {
+                var thisStat = Math.floor(stat(co,a,b,c,d,e)*baseBP)
+                if (level==1) cor = cor && thisStat == p.stat[co]
+                else cor = cor && (Math.abs(thisStat-p.stat[co]) <= errorMargin)
+                //add((Math.floor(stat(co,a,b,c,d,e)*baseBP) + 'vs' + p.stat[co]) + ' | ')
+              }
+              var sum = a+b+c+d+e
+              cor = cor && ((BPClSum+10) >= sum)
+              cor = cor && ((BPClSum-10) <= sum)
+              if (cor && doCheckBP) {
+                for (var x=0;x<5;x++) {
+                  eval("cor = cor && (Math.floor(baseBP*"+String.fromCharCode(97+x)+")==p.BP[x])")                  
+                }
+                //add("BP check: " + baseBP*a + ' vs ' + p.BP[0] + "<BR>")
+                //add("BP check: " + baseBP*b + ' vs ' + p.BP[0] + "<BR>")
+                //add("BP check: " + baseBP*c + ' vs ' + p.BP[0] + "<BR>")
+                //add("BP check: " + baseBP*d + ' vs ' + p.BP[0] + "<BR>")
+                //add("BP check: " + baseBP*e + ' vs ' + p.BP[0] + "<BR>")
+              }
+              if (cor) {
+                var sureLoss = Math.max(0,BPCl[0]-a)+Math.max(0,BPCl[1]-b)+
+                  Math.max(0,BPCl[2]-c)+Math.max(0,BPCl[3]-d)+Math.max(0,BPCl[4]-e)
+                totalLoss = BPClSum+10-sum
+                if (sureLoss>totalLoss) cor = false
+              }
+              if (cor && p.spi!=undefined) {
+                var thisSpi = Math.floor(spi(combo)*baseBP+100)
+                if (level==1) cor = cor && (p.spi==thisSpi)
+                else cor = cor && (Math.abs(thisSpi-p.spi) <= errorMargin)
+                //add('p.spi = ' + p.spi + ' vs ' + 'cal = ' + Math.floor(spi(combo)*baseBP+100))
+              }
+              if (cor && p.rev!=undefined) {
+                var thisRev = Math.floor(rev(combo)*baseBP+100)
+                if (level==1) cor = cor && (p.rev==thisRev)
+                else cor = cor && (Math.abs(thisRev-p.rev) <= errorMargin)                
+                //add('p.rev = ' + p.rev + ' vs ' + 'cal = ' + Math.floor(rev(combo)*baseBP+100))
+              }
+              if (cor) {
+                var solution = new Array(a,b,c,d,e)
+                p.sols[numOfResults] = new sol(solution,gr)
+                numOfResults++
+              }
+            }
+          }
+        }
+      }
+    }
+  }  
+//END OF INDEX USE
+  
+  if (numOfResults>0) {
+    p.lossMin = 20
+    p.lossMax = 0
+    p.cfLossSummary = new Array(4,4,4,4,4)
+    p.maxLossSummary = new Array(0,0,0,0,0)
+    if (p.spi==undefined) p.spi = Math.floor(p.sols[0].spi)
+    if (p.rev==undefined) p.rev = Math.floor(p.sols[0].rev)
+    if (p.BP==undefined) {
+      p.BP = new Array(5)
+      for (var st=0;st<5;st++) p.BP[st] = Math.floor(p.sols[0].BP[st])
+    }
+  }
+  for (var r=0;r<numOfResults;r++) {
+    if (p.spi == undefined || (Math.floor(p.sols[r].spi) != p.spi)) p.spi = undefined
+    if (p.rev == undefined || (Math.floor(p.sols[r].rev) != p.rev)) p.rev = undefined
+    if (!doCheckBP) {
+      //possible performance improvement here?
+      for (var st=0;st<5;st++) {
+        if (p.BP[st]==undefined) break
+        else if (p.BP[st] != Math.floor(p.sols[r].BP[st])) p.BP[st] = undefined
+      }
+    }
+    totalLoss = BPClSum+10
+    for (var st=0;st<5;st++) {
+      p.sols[r].cfLoss[st] = Math.max(0,BPCl[st]-p.sols[r].cl[st])
+      totalLoss -= p.sols[r].cl[st]
+    }
+    var minLoss = Math.max(0,totalLoss-16)
+    for (var st=0;st<5;st++) {
+      p.sols[r].cfLoss[st] = Math.max(p.sols[r].cfLoss[st],minLoss)
+      p.cfLossSummary[st] = Math.min(p.sols[r].cfLoss[st],p.cfLossSummary[st])
+    }
+    p.sols[r].loss = totalLoss
+    p.lossMin = Math.min(p.lossMin,totalLoss)
+    p.lossMax = Math.max(p.lossMax,totalLoss)
+    var unCfLoss = totalLoss
+    for (var st=0;st<5;st++) unCfLoss -= p.sols[r].cfLoss[st]
+    for (var st=0;st<5;st++) {
+      p.sols[r].maxLoss[st] = Math.min(unCfLoss+p.sols[r].cfLoss[st],4)
+      p.maxLossSummary[st] = Math.max(p.sols[r].maxLoss[st],p.maxLossSummary[st])
+    }
+  }
+  for (var st=0;st<5;st++) p.stat[st]+=20
+}
+
+function output() {
+  add('<B>' + ptList.length + '隻' + name + '能力分布:</B><BR><FONT FACE="Courier,System,MS Sans Serif">')
+
+  var maxStat = new Array(5)
+  var minStat = new Array(5)
+  //note: undefined values are ignored, and possible utilisation of sol data
+  //      to determine max/min is NOT implmented
+  var maxBP = new Array(5)
+  var minBP = new Array(5)
+  var maxSpi, maxRev, minSpi, minRev, maxLoss, minLoss
+  var minCfLoss = new Array(5)
+  var minMaxLoss = new Array(5)
+  var maxCfLoss = new Array(5)
+  var maxMaxLoss = new Array(5)
+  var lossLeftLen=2, lossRightLen=2
+  //TO DO: add Switch later for printSR
+  var printSR = true
+
+  //finding max and min values
+  for (var st=0;st<5;st++) {
+    maxStat[st] = ptList[0].stat[st]
+    minStat[st] = ptList[0].stat[st]
+    if (ptList[0].sols!=undefined && ptList[0].sols.length>0) {
+      if (ptList[0].BP[st]) {
+        maxBP[st] = ptList[0].BP[st]
+        minBP[st] = ptList[0].BP[st]
+      }
+    }
+  }
+  for (var p in ptList) {
+    for (var st=0;st<5;st++) {
+      maxStat[st] = Math.max(maxStat[st],ptList[p].stat[st])
+      minStat[st] = Math.min(minStat[st],ptList[p].stat[st])
+      if (ptList[p].BP!= undefined && ptList[p].BP[st]) {
+        if (maxBP[st]==undefined) {
+          maxBP[st] = ptList[p].BP[st]
+          minBP[st] = ptList[p].BP[st]
+        }
+        else {
+          maxBP[st] = Math.max(maxBP[st],ptList[p].BP[st])
+          minBP[st] = Math.min(minBP[st],ptList[p].BP[st])
+        }
+      }
+    }
+    if (ptList[p].sols.length>0) {
+      if (maxLoss==undefined) {
+        maxLoss = ptList[p].lossMin*100+ptList[p].lossMax
+        minLoss = ptList[p].lossMin*100+ptList[p].lossMax
+        for (var st=0;st<5;st++) {
+          minCfLoss[st] = ptList[p].cfLossSummary[st]
+          maxCfLoss[st] = ptList[p].cfLossSummary[st]
+          minMaxLoss[st] = ptList[p].maxLossSummary[st]
+          maxMaxLoss[st] = ptList[p].maxLossSummary[st]
+        }
+      }
+      else {
+        var thisLoss = ptList[p].lossMin*100+ptList[p].lossMax
+        if (thisLoss > maxLoss) {
+          maxLoss = thisLoss
+          for (var st=0;st<5;st++) {
+            maxCfLoss[st] = ptList[p].cfLossSummary[st]
+            maxMaxLoss[st] = ptList[p].maxLossSummary[st]
+          }
+        }
+        if (thisLoss < minLoss) {
+          minLoss = thisLoss
+          for (var st=0;st<5;st++) {
+            minCfLoss[st] = ptList[p].cfLossSummary[st]
+            minMaxLoss[st] = ptList[p].maxLossSummary[st]
+          }
+        }
+      }
+      if (lossRightLen==2 && ptList[p].lossMax>9 && (ptList[p].lossMax!=ptList[p].lossMin)) lossRightLen = 3
+    }
+    if (printSR) {
+      if (ptList[p].spi!=undefined) {
+        if (maxSpi==undefined) {
+          maxSpi = ptList[p].spi
+          minSpi = ptList[p].spi
+        }
+        else {
+          maxSpi = Math.max(maxSpi,ptList[p].spi)
+          minSpi = Math.min(minSpi,ptList[p].spi)
+        }
+      }
+      if (ptList[p].rev!=undefined) {
+        if (maxRev==undefined) {
+          maxRev = ptList[p].rev
+          minRev = ptList[p].rev
+        }
+        else {
+          maxRev = Math.max(maxRev,ptList[p].rev)
+          minRev = Math.min(minRev,ptList[p].rev)
+        }
+      }
+    }
+  }
+  if (maxLoss>=1000) lossLeftLen=3
+  var solLossPad = Math.max(lossLeftLen, lossRightLen)
+  var checkUndefined = new Array('maxSpi', 'maxRev', 'minSpi', 'minRev', 'maxLoss', 'minLoss')
+  for (var st in checkUndefined) if (!eval(checkUndefined[st])) eval(checkUndefined[st] + "='?'")
+  for (var st=0;st<5;st++) {
+    if (!maxBP[st]) maxBP[st]='?'
+    if (!minBP[st]) minBP[st]='?'    
+  }
+//actual printing bit start here:
+  var ptL = Math.max((((ptList.length+1) + "").length + 2),4)
+  var lineOutput = ""
+  for (var p in ptList) {
+    p = parseInt(p)
+    lineOutput += pad("right",ptL,("#" + (p+1) + ":"))
+    if (oType == 1) lineOutput += "<BR>"
+    for (var st=0;st<5;st++) {
+      lineOutput += pad("right",(maxStat[st]+"").length,ptList[p].stat[st]) + '&nbsp'
+      if (oType==1) lineOutput += '&nbsp&nbsp&nbsp'
+    }
+    if (printSR) {
+      lineOutput += pad("right",(maxSpi+"").length,ptList[p].spi) + '&nbsp'
+      if (oType==1) lineOutput += '&nbsp&nbsp&nbsp'
+      lineOutput += pad("right",(maxRev+"").length,ptList[p].rev) + '&nbsp'
+      if (oType==1) lineOutput += '&nbsp&nbsp&nbsp'
+    }
+    for (var st=0;st<5;st++) {
+      if (ptList[p].BP==undefined) lineOutput += pad("right",(maxBP[st]+"").length,undefined) + '&nbsp'
+      else lineOutput += pad("right",(maxBP[st]+"").length,ptList[p].BP[st]) + '&nbsp'
+      if (oType==1) lineOutput+='&nbsp&nbsp'
+    }
+    if (ptList[p].cfLossSummary==undefined) {
+      lineOutput += "無解<BR>"
+    }
+    else {    
+      if (oType!=1) lineOutput += pad("right",lossLeftLen,"-" + ptList[p].lossMin)
+      if (ptList[p].lossMin!=ptList[p].lossMax) {
+        if (oType==1) lineOutput += pad("right",lossRightLen,"-?") + '&nbsp'
+        else lineOutput += " ~ " + pad("right",lossRightLen,"-" + ptList[p].lossMax) + '&nbsp'
+      }
+      else if (oType==1) lineOutput += pad("right",lossLeftLen,"-" + ptList[p].lossMin) + '&nbsp'
+      else lineOutput += pad("right",lossRightLen+3,"") + '&nbsp'
+      if (oType==1) {
+        for (var st=0;st<5;st++) lineOutput+=ptList[p].cfLossSummary[st]
+        lineOutput += '&nbsp'
+        for (var st=0;st<5;st++) lineOutput+=ptList[p].maxLossSummary[st]
+        lineOutput += '<BR>'    
+      }
+      else lineOutput += ptList[p].cfLossSummary + '&nbsp' + ptList[p].maxLossSummary + '<BR>'
+    }
+
+    if (oType==1 && ptList[p].sols.length>0) {
+      var solLine = ""
+      for (var s in ptList[p].sols) {
+        for (var st in ptList[p].sols[s].stat) {
+          solLine += pad("right",(maxStat[st]+"").length+3,ptList[p].sols[s].stat[st].toFixed(2)) + '&nbsp'
+        }
+        solLine += pad("right",(maxSpi+"").length+3,ptList[p].sols[s].spi.toFixed(2)) + '&nbsp' + pad("right",(maxRev+"").length+3,ptList[p].sols[s].rev.toFixed(2)) + '&nbsp'
+        for (var b in ptList[p].sols[s].BP) {
+          solLine += pad("right",(maxBP[st]+"").length+2,ptList[p].sols[s].BP[b].toFixed(1)) + '&nbsp'
+        }
+        solLine += pad("right",solLossPad,'-' + ptList[p].sols[s].loss) + '&nbsp'
+        for (var st=0;st<5;st++) solLine+=ptList[p].sols[s].cfLoss[st]
+        solLine += '&nbsp'
+        for (var st=0;st<5;st++) solLine+=ptList[p].sols[s].maxLoss[st]
+        solLine += '<BR>'
+      }
+      solLine += '<BR>'
+      lineOutput += solLine
+    }
+    if ((p%2)==0)  {
+      add(lineOutput)
+      lineOutput = ""
+    }
+  }
+  //need to account for 0 after % operation
+
+  if (ptList.length>1) {
+    lineOutput += pad("right",ptL,"Max:")
+    for (var st=0;st<5;st++) lineOutput += pad("right",(maxStat[st]+"").length,maxStat[st]) + '&nbsp'
+    if (printSR) lineOutput += pad("right",(maxSpi+"").length,maxSpi) + '&nbsp' + pad("right",(maxRev+"").length,maxRev) + '&nbsp'
+    for (var st=0;st<5;st++) lineOutput += pad("right",(maxBP[st]+"").length,maxBP[st]) + '&nbsp'
+    if (isNaN(maxLoss)) lineOutput+="全部無解.<BR>"
+    else {
+      lineOutput += pad("right",lossLeftLen,"-" + Math.floor(minLoss/100))
+      if (Math.floor(minLoss/100)!=(minLoss%100)) lineOutput += ' ~ ' + pad("right",lossRightLen,"-" + (minLoss%100)) + '&nbsp'
+      else lineOutput += pad("right",lossRightLen+3,"") + '&nbsp'
+      lineOutput += minCfLoss + '&nbsp' + minMaxLoss + '<BR>'
+    }
+    lineOutput += pad("right",ptL,"Min:")
+    for (var st=0;st<5;st++) lineOutput += pad("right",(maxStat[st]+"").length,minStat[st]) + '&nbsp'
+    if (printSR) lineOutput += pad("right",(maxSpi+"").length,minSpi) + '&nbsp' + pad("right",(maxRev+"").length,minRev) + '&nbsp'
+    for (var st=0;st<5;st++) lineOutput += pad("right",(maxBP[st]+"").length,minBP[st]) + '&nbsp'
+    if (isNaN(maxLoss)) lineOutput+="全部無解.<BR>"
+    else {
+      lineOutput += pad("right",lossLeftLen,"-" + Math.floor(maxLoss/100))
+      if (Math.floor(maxLoss/100)!=(maxLoss%100)) lineOutput += ' ~ ' + pad("right",lossRightLen,"-" + (maxLoss%100)) + '&nbsp'
+      else lineOutput += pad("right",lossRightLen+3,"") + '&nbsp'
+      lineOutput += maxCfLoss + '&nbsp' + maxMaxLoss + '<BR>'
+    }
+  }
+
+  ptList = new Array()
+  end = new Date()
+  lineOutput += '</FONT><BR>共費 ' + (end-now)/1000 + ' 秒<BR>' + '<HR NOSHADE COLOR="#6699CC">'
+  add(lineOutput)
+  printTo('myDiv3',o)
+  printTo('helpText',"計算完畢.")
+}
+
+function pad(pos,len,text) {
+  if (text==undefined) text = '?'
+  text = ""+text
+  len = (len-text.length)
+  if (pos=="right") {
+    for (var pa=0;pa<len;pa++) {
+      text = "&nbsp" + text
+    }
+    return text
+  }
+  if (pos=="center") {
+    for (var pa=0;pa<Math.floor(len/2);pa++) {
+      text = "&nbsp" + text
+    }
+    for (var pa=0;pa<Math.ceil(len/2);pa++) {
+      text = text + "&nbsp"
+    }
+    return text
+  }
+  if (pos=="left") {
+    for (var pa=0;pa<len;pa++) {
+      text = text + "&nbsp"
+    }
+    return text
+  }
+}
+
+function rev(list) {
+  return ((list[0]*8 - list[1] - list[2] + list[3]*2 - list[4]*3) / 10)
+}
+
+function spi(list) {
+  return ((-list[0]*3 - list[1] + list[2]*2 - list[3]*1 + list[4]*8) / 10)
+}
+
+function stat(type,a,b,c,d,e) {
+  if (arguments.length==2) {
+    return stat(type,arguments[1][0],arguments[1][1],arguments[1][2],arguments[1][3],arguments[1][4])
+  }
+  var precision = 3
+  a = a.toFixed(precision)
+  b = b.toFixed(precision)
+  c = c.toFixed(precision)
+  d = d.toFixed(precision)
+  e = e.toFixed(precision)
+  type = parseInt(type)
+  switch (type) {
+    case 0 : return a*8+b*2+c*3+d*3+e*1
+    case 1 : return a*1+b*2+c*2+d*2+e*10;
+    case 2 : return (a*2+b*27+c*3+d*3+e*2)/10
+    case 3 : return (a*2+b*3+c*30+d*3+e*2)/10
+    default: return (a*1+b*2+c*2+d*20+e*1)/10
+  }
+}
+
+function getRefToDiv(divID) {
+    if( document.layers ) { //Netscape layers
+        return document.layers[divID]; }
+    if( document.getElementById ) { //DOM; IE5, NS6, Mozilla, Opera
+        return document.getElementById(divID); }
+    if( document.all ) { //Proprietary DOM; IE4
+        return document.all[divID]; }
+    return false;
+}
+
+function add(text) {o+=text}
+
+function printTo(divID, text) {
+  myRef = getRefToDiv(divID)
+  if( typeof( myRef.innerHTML ) != 'undefined' ) {
+    //used by the IE series, Konqueror, Opera 7+ and Gecko browsers
+    myRef.innerHTML = text;
+  } else {
+    if( myRef.document && myRef.document != window.document ) {
+      //used by layers browsers
+      myRef.document.open();
+      myRef.document.write(text);
+      myRef.document.close();
+    } else {
+      if( window.frames && window.frames.length && window.frames['nameOfIframe'] ) {
+        //used by browsers like Opera 6-
+        myRef = window.frames['nameOfIframe'].window;
+        myRef.document.open();
+        myRef.document.write(text);
+        myRef.document.close();
+      }
+    }
+  }
+}
+
+function showDiv(divID) {
+    myRef = getRefToDiv(divID)
+    if( !myRef ) return
+    if( myRef.style ) myRef.style.visibility = 'visible'
+    else if( myRef.visibility ) myRef.visibility = 'show'
+    return
+}
+
+function hideDiv(divID) {
+    myRef = getRefToDiv(divID)
+    if( !myRef ) return
+    if( myRef.style ) myRef.style.visibility = 'hidden'
+    else if( myRef.visibility ) myRef.visibility = 'hide'
+    return
+}
+
+function helpMessage() {
+  if (failure) {
+    printTo('helpText','請檢查數據並依<b>血魔攻防敏 精回 體力強速魔</b>順序輸入寵物能力, 每行一隻寵, 然後按<b>開始計算</b>. 精神/回復/BP可以不填.')
+    return
+  }
+  if (choose.ptMenu.value=="-1") {
+    printTo('helpText','請選取欲計算的寵物.')
+  }
+  else if (choose.input.value=='')
+    printTo('helpText','請依<b>血魔攻防敏 精回 體力強速魔</b>順序輸入寵物能力, 每行一隻寵, 然後按<b>開始計算</b>. 精神/回復/BP可以不填.')
+  else if (calculated && !failure) printTo('helpText','計算完畢.')
+  else printTo('helpText','準備就緒, 可以開始計算.')
+  return
+}
+
+function notDone() {
+  calculated = false
+  failure = false
+}
+
+function toggleCalc() {
+  if (classCalcOpen) {
+    hideDiv('classCalc')
+    showDiv('sim')
+    classCalcOpen=false
+    printTo('switch','切換至一級寵物檔次計算機')
+    printTo('heading','寵物成長模擬')
+  }
+  else {
+    hideDiv('sim')
+    showDiv('classCalc')
+    classCalcOpen=true
+    printTo('switch','切換至寵物成長模擬')
+    printTo('heading','一級寵物檔次計算機')
+  }
+}
+
+//-->
+</SCRIPT>
+
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#0000FF" VLINK="#FF0000" ALINK="#00A000">
+<CENTER>
+<H1>寵物計算機 Ver 0.93</H1>
+</CENTER>
+<FORM NAME="choose">
+<DIV id="myDiv" style="position: relative; left: 10px; top: 0px;background-color:#FFFFFF">
+<TABLE BORDER=5 BGCOLOR="#FFFFFF" bordercolor="#6699CC" width="580" cellspacing="1">
+  <TR>
+    <TD>
+    <p align="center"><b>寵物設定</b>
+    </TD>
+    <TD align=left width=100%>
+      <B><DIV id="heading">
+        <p align="center">一級寵物檔次計算機</DIV></B>
+ <!--
+ <A HREF="javascript:void(0)" onClick="toggleCalc()"><DIV id="switch">切換至寵物成長模擬</DIV></A>
+ //-->
+      <A HREF="javascript:void(0)" onClick="javascript:void(0)"><DIV id="switch"></DIV></A>
+    </TD>
+  </TR>
+  <TR>
+    <TD WIDTH=110px NOWRAP>
+      <small>等級</small>
+      <INPUT name="ptLevel" type="text" size=3 maxlength=3 value="1"><BR>
+      <small>種族:</small>
+      <SELECT name="raceMenu" onChange="loadMenu(this.selectedIndex-1);" size="1">
+         <OPTION SELECTED VALUE="-1">全種族
+         <SCRIPT Language="JavaScript">
+           <!--
+             for (var i in raceNames) {
+               document.write('<OPTION VALUE="' + i + '">' + raceNames[i])
+             }
+           //-->
+         </SCRIPT>
+      </SELECT><BR>
+      <CENTER>
+      <SELECT SIZE=9 NAME="ptMenu" onChange="loadData();helpMessage()" onfocus="helpMessage()" onblur="helpMessage()">
+        <OPTION SELECTED VALUE="-1">寵物名:
+        <SCRIPT Language="JavaScript">
+          <!--
+            for (var i in Pts) {
+              document.write('<OPTION VALUE="' + Pts[i][0] + '">' + Pts[i][1])
+            }
+            //choose.ptMenu.selectedIndex=0
+          //-->
+        </SCRIPT>
+      </SELECT></CENTER>
+      <TD>
+      <DIV id="sim" style="position: absolute; left: 140px; top: 50px;visibility:hidden;background-color:#FFFFFF;xIndex=100">
+      <TABLE BORDER=3>
+        <SCRIPT Language="JavaScript">
+          <!--
+            document.write('<TR><TD></TD><TH>0</TH>')
+            for (var col=1;col<5;col++) {
+              document.write('<TH>-' + col + '</TH>')
+            }
+            document.write('</TR>')
+            for (var row=1;row<6;row++) {
+              document.write('<TR><TH>' + BPNameList[row-1] + '</TH>')
+              document.write('<TD><INPUT TYPE="radio" NAME="BP' + row + '" VALUE="0" CHECKED></TD>')
+              for (var col=1;col<5;col++) {
+                document.write('<TD><INPUT TYPE="radio" NAME="BP' + row + '" VALUE="' + col + '"></TD>')
+              }
+              document.write('</TR>')
+            }
+          //-->
+        </SCRIPT>
+      </TABLE>
+      </DIV>
+      <DIV id="classCalc" style="background-color:#FFFFFF">
+      <TABLE border=3 bordercolor="#6699CC">
+      <TR>
+      <TD ROWSPAN=2>
+      <TEXTAREA COLS=56 ROWS=10 WRAP="off" NAME="input" onChange="notDone()" onfocus="helpMessage()" onblur="helpMessage()">
+可同時驗算一或多隻同等級寵物檔次&#12290;
+使用方法：
+先選擇左邊需要計算的寵物名，再於本格中依序填入
+能力值: 血量 魔力 攻擊 防禦 敏捷 精神 回復 及
+BP值: 體力 力量 強度 速度 魔法. (精/回/BP可不填.)
+輸入範本(單隻寵)：
+98 65 41 40 29 99 103 4 6 5 3 1
+或(多隻寵, 每行一隻寵)：
+98 65 41 40 29 99 103 4 6 5 3 1
+100 72 41 38 29 99 103 5 6 4 3 1
+      </TEXTAREA>
+    </TD>
+    <TD VALIGN='bottom' ALIGN='left'>
+      <SELECT SIZE=0 NAME="outputType" onChange="notDone();helpMessage()">
+        <OPTION SELECTED VALUE="0">顯示摘要
+        <OPTION VALUE="1">顯示明細
+      </SELECT>
+    </TD>
+  <TR>
+    <TD VALIGN='bottom'>
+      <INPUT type="checkbox" name="clearOutput" CHECKED value="ON">清除上筆結果<BR>
+      <INPUT type="checkbox" name="clearInput" value="ON">計算完成後清除數據<BR><BR><BR>
+      <INPUT TYPE=BUTTON ALIGN=CENTER VALUE="開始計算" onMouseOut="helpMessage()" onMouseDown="printTo('helpText','計算中...')" onClick = "calculate()">
+    </TD>
+  </TR>
+
+  </TR>
+  </TABLE>
+  </DIV>
+  </TD>
+</TABLE>
+</DIV>
+
+<TABLE>
+<TR><TD>
+<DIV id="temp" style="position: relative; left:10px; top:20px;">
+<INPUT type="text" name="data" size=30></DIV></TD>
+<TD><DIV id="helpText" style="position: relative; left:10px; top:20px;">請選取欲計算的寵物.</DIV></TD></TR>
+</TABLE>
+</FORM>
+<NOBR>
+<DIV id="myDiv3" style="position: relative; left: 0px; top: 0px;">
+</DIV></NOBR>
+<SCRIPT LANGUAGE="JavaScript1.2">
+if (Date.parse(document.lastModified)!=0) document.write("最後更新時間: " + document.lastModified +"<BR><BR>")
+document.write("相關建議或問題討論請至 巴哈姆特 (<b>bbs.gamer.com.tw</b>) CrossGate-T板<BR><BR>")
+document.write("by <I>射手星系</I> - 風某")
+</SCRIPT>
+<HR NOSHADE COLOR="#6699CC" size="1" width="95%">
+</BODY>
+</HTML>

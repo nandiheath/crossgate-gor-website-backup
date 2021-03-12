@@ -1,0 +1,597 @@
+<html>
+
+<head>
+<LINK href="../fsize-b.css" rel=stylesheet>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<title>物理傷害計算</title>
+<STYLE>BODY {
+	SCROLLBAR-FACE-COLOR: #d8e8f5; SCROLLBAR-HIGHLIGHT-COLOR: #ffffff; SCROLLBAR-SHADOW-COLOR: #6b8ec6; SCROLLBAR-3DLIGHT-COLOR: #6b8ec6; SCROLLBAR-ARROW-COLOR: #6b8ec6; SCROLLBAR-TRACK-COLOR: #ffffff; SCROLLBAR-DARKSHADOW-COLOR: #ffffff; SCROLLBAR-BASE-COLOR: #000000
+}
+</STYLE>
+</head>
+<BODY bgcolor="#FFFFFF">
+<SCRIPT>
+function Phoenix()
+{
+	if ( (CheckATK(CG.attacker)) &&
+	     (CheckATKed(CG.atked)) )
+	{
+		atk=CG.attack.value;
+		def=CG.defence.value;
+		atkLV=CG.atkLV.value;
+		defLV=CG.defLV.value;
+						
+		if (CG.attacker[3].status)		//崩擊
+		{
+			if (!CG.atked[0].status)		//不防禦
+			{
+				CG.damage90.value = "Miss";
+				CG.damage91.value = "Miss";
+				CG.damage92.value = "Miss";
+				CG.damage93.value = "Miss";
+				CG.damage94.value = "Miss";
+				CG.damage95.value = "Miss";
+				CG.damage96.value = "Miss";
+				CG.damage97.value = "Miss";
+				CG.damage98.value = "Miss";
+				CG.damage99.value = "Miss";
+				CG.damage100.value = "Miss";
+				CG.damage101.value = "Miss";
+				CG.damage102.value = "Miss";
+				CG.damage103.value = "Miss";
+				CG.damage104.value = "Miss";
+				CG.damage105.value = "Miss";
+				CG.damage106.value = "Miss";
+				CG.damage107.value = "Miss";
+				CG.damage108.value = "Miss";
+				CG.damage109.value = "Miss";
+				CG.damage110.value = "Miss";
+				alert("崩擊請站好給他崩嘿!");
+				return false;
+			}
+		}
+		
+		if (CG.atked[1].status)			//諸刃
+		{
+			def = def * (1-(CG.sdie.value) * 5 / 100);
+		}
+		
+		if (CG.atked[2].status)			//陽炎
+		{
+			def = def * (1-(CG.bdie.value) * 7 / 100);
+		}
+		
+		sdef = def / 2				//必殺用
+		
+		if (CG.attacker[1].status)		//諸刃
+		{
+			atk = atk * (1+(CG.small.value) * 7 / 100);
+		}
+		
+		if (atk > 240 )				//240之後開始減緩增值
+		{
+			atk = 240 + (atk-240) * 3 / 10
+		};
+		
+		if (def > 240 )
+		{
+			def = 240 + (def-240) * 3 / 10
+		};
+		
+		atk = atk * 1;				//字串轉數值
+		def = def * 1;
+		
+		down = atk + 3 * def;
+		up = 3 * atk * atk;
+		result = up / down			//不相克的結果
+		
+		if (CG.weapon.value == "1")		//有拿武器
+		{
+			result = result * 1.15;
+		}
+		
+		switch(CG.kind.value)			//種族
+		{
+		case "1":
+			result = result * 1.2;
+			break;
+		case "2":
+			result = result * 10 / 9;	//猜測..不保證 證實錯誤後可修正
+			break;
+		case "4":
+			result = result * 8 / 9;	//確定
+			break;
+		case "5":
+			result = result * 0.8;
+			break;
+		}
+		
+		if (CG.porn.value == "1")		//水晶
+		{
+			result = result * (1+(CG.extn.value) * 3 / 1000);
+		}
+		else
+		{
+			result = result * (1-(CG.extn.value) * 3 / 1000);
+		}
+		
+//		switch(CG.special.value)			//特殊 全屬性
+//		{
+//		case "2": 				//全屬性(中) 法王 海賊王...等 一堆
+//			result = result * 5 / 6;
+//			break;
+//		case "3":
+//			result = result * 0.4;		//強 露比 F4 小帕 猶大 暗醫..等
+//			break;
+//		}
+		
+		sresult = result + atkLV / defLV * sdef;	//必殺
+		
+		if (CG.attacker[2].status)		//乾坤
+		{
+			result = result * (1+(CG.big.value) / 10);
+			sresult = sresult * (1+(CG.big.value) / 10);
+		}
+		
+		if (CG.attacker[3].status)		//崩級
+		{
+			result = result * (  ( (10 + (CG.sbig.value) * 1) * (10 + (CG.sbig.value) * 1) - 1 ) / 100 );
+			sresult = sresult * (  ( (10 + (CG.sbig.value) * 1) * (10 + (CG.sbig.value) * 1) - 1 ) / 100 );
+		}
+		
+							//結果
+		CG.damage90.value = Math.floor(result * 0.90);
+		CG.damage91.value = Math.floor(result * 0.91);
+		CG.damage92.value = Math.floor(result * 0.92);
+		CG.damage93.value = Math.floor(result * 0.93);
+		CG.damage94.value = Math.floor(result * 0.94);
+		CG.damage95.value = Math.floor(result * 0.95);
+		CG.damage96.value = Math.floor(result * 0.96);
+		CG.damage97.value = Math.floor(result * 0.97);
+		CG.damage98.value = Math.floor(result * 0.98);
+		CG.damage99.value = Math.floor(result * 0.99);
+		CG.damage100.value = Math.floor(result);
+		CG.damage101.value = Math.floor(result * 1.01);
+		CG.damage102.value = Math.floor(result * 1.02);
+		CG.damage103.value = Math.floor(result * 1.03);
+		CG.damage104.value = Math.floor(result * 1.04);
+		CG.damage105.value = Math.floor(result * 1.05);
+		CG.damage106.value = Math.floor(result * 1.06);
+		CG.damage107.value = Math.floor(result * 1.07);
+		CG.damage108.value = Math.floor(result * 1.08);
+		CG.damage109.value = Math.floor(result * 1.09);
+		CG.damage110.value = Math.floor(result * 1.10);
+//		CG.sdamage90.value = Math.floor(sresult * 0.90);	//必殺誤差過大 拿掉
+//		CG.sdamage91.value = Math.floor(sresult * 0.91);
+//		CG.sdamage92.value = Math.floor(sresult * 0.92);
+//		CG.sdamage93.value = Math.floor(sresult * 0.93);
+//		CG.sdamage94.value = Math.floor(sresult * 0.94);
+//		CG.sdamage95.value = Math.floor(sresult * 0.95);
+//		CG.sdamage96.value = Math.floor(sresult * 0.96);
+//		CG.sdamage97.value = Math.floor(sresult * 0.97);
+//		CG.sdamage98.value = Math.floor(sresult * 0.98);
+//		CG.sdamage99.value = Math.floor(sresult * 0.99);
+//		CG.sdamage100.value = Math.floor(sresult);
+//		CG.sdamage101.value = Math.floor(sresult * 1.01);
+//		CG.sdamage102.value = Math.floor(sresult * 1.02);
+//		CG.sdamage103.value = Math.floor(sresult * 1.03);
+//		CG.sdamage104.value = Math.floor(sresult * 1.04);
+//		CG.sdamage105.value = Math.floor(sresult * 1.05);
+//		CG.sdamage106.value = Math.floor(sresult * 1.06);
+//		CG.sdamage107.value = Math.floor(sresult * 1.07);
+//		CG.sdamage108.value = Math.floor(sresult * 1.08);
+//		CG.sdamage109.value = Math.floor(sresult * 1.09);
+//		CG.sdamage110.value = Math.floor(sresult * 1.10);
+		
+	}
+}
+
+function CheckATK(UI)
+{
+	for (i = 0; i < UI.length; i++)
+	{
+         	if (UI[i].status)
+         	{
+			return(true);
+		}
+	}
+	alert ("請選擇攻擊者技能!");
+	return (false);
+}
+
+function CheckATKed(UI)
+{
+	for (i = 0; i < UI.length; i++)
+	{
+         	if (UI[i].status)
+         	{
+			return(true);
+		}
+	}
+	alert ("請選擇挨打者技能!");
+	return (false);
+}
+
+</SCRIPT>
+
+<FORM name=CG>
+<table border="0" cellspacing="0" width="100%" id="AutoNumber5" cellpadding="0" style="border-collapse: collapse" bordercolor="#111111">
+  <tr>
+    <td width="100%">
+    <table border="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber6" cellpadding="0">
+      <tr>
+        <td width="1%">
+    <font face="serif" style="font-size: 一般">
+    <img border="0" src="../images/left.gif" width="22" height="20"></font></td>
+        <td width="98%" bgcolor="#6699CC"><b>
+    <font face="新細明體" color="#FFFFFF" style="font-size: 一般">PK對戰物理傷害計算</font></b></td>
+        <td width="1%">
+    <font face="新細明體" style="font-size: 一般">
+    <img border="0" src="../images/right.gif" width="22" height="20"></font></td>
+      </tr>
+    </table>
+    </td>
+  </tr>
+</table>
+<CENTER>
+<TABLE width="100%" border=1 bordercolor="#6699CC" style="font-size: 10 pt">
+  <TBODY>
+  <TR>
+    <TD width="20%" bgcolor="#6699CC" align="center">　</TD>
+    <td width="40%" align="center" bgcolor="#6699CC" height="13"><b>
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般">
+    <span style="font-size: 一般">攻擊者</span></font></b><span style="font-size: 一般"></td>
+    <td width="40%" align="center" bgcolor="#6699CC" height="13"><b>
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般">被攻擊者</font></b></td>
+  </TR>
+  <TR>
+    <td width="20%" align="center" bgcolor="#6699CC" height="19"></span><b>
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般">
+    <span style="font-size: 一般">等級</span></font></b></td>
+    <TD width="35%" bgcolor="#EFF3F7">
+    <FONT color=blue face="新細明體" style="font-size: 一般"><INPUT size=4 value=60 name=atkLV></FONT></TD>
+    <TD width="73%" bgcolor="#EFF3F7">
+    <FONT color=red face="新細明體" style="font-size: 一般"><INPUT size=4 value=60 name=defLV></FONT></TD>
+    </TR>
+  <TR>
+    <td width="20%" align="center" bgcolor="#6699CC" height="17">
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般"><b>
+    <span style="font-size: 一般">雙方能力</span></b></font><span style="font-size: 一般"></td>
+    <TD width="35%" bgcolor="#EFF3F7"></span>
+    <font face="新細明體" style="font-size: 一般" color="blue">
+    <span style="font-size: 一般">攻擊：<INPUT size=4 value=640
+      name=attack></span></font></TD>
+    <TD width="73%" bgcolor="#EFF3F7">
+    <font color="#FF0000" style="font-size: 一般" face="新細明體">
+    <span style="font-size: 一般">防</span></font><font style="font-size: 一般" face="新細明體" color="red"><span style="font-size: 一般">禦：<INPUT size=4 value=300
+      name=defence></span></font></TD>
+    </TR>
+  <TR>
+    <TD width="20%" bgcolor="#6699CC" align="center"><b>
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般">使用技能種類</font></b></TD>
+    <TD width="35%" bgcolor="#EFF3F7">
+    <p style="margin-top: 0; margin-bottom: 0">
+    <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般">
+    <INPUT
+      type=radio name=attacker value="1" checked>普攻或使用陽炎</span></font></p>
+    <p style="margin-top: 0; margin-bottom: 0">
+    <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般">
+    <INPUT type=radio name=attacker value="2">諸刃等級<SELECT size=1 name=small> <OPTION value=1 selected>
+    1</OPTION> <OPTION
+        value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
+        <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
+        value=7>7</OPTION> <OPTION value=8>8</OPTION> <OPTION value=9>9</OPTION>
+        <OPTION value=10>10</OPTION></SELECT></span></font></p>
+    <p style="margin-top: 0; margin-bottom: 0">
+    <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般">
+    <INPUT type=radio name=attacker value="4">乾坤一擲<SELECT size=1 name=big> <OPTION value=1
+        selected>1</OPTION> <OPTION value=2>2</OPTION> <OPTION
+        value=3>3</OPTION> <OPTION value=4>4</OPTION> <OPTION value=5>5</OPTION>
+        <OPTION value=6>6</OPTION> <OPTION value=7>7</OPTION> <OPTION
+        value=8>8</OPTION> <OPTION value=9>9</OPTION> <OPTION
+        value=10>10</OPTION></SELECT></span></font></p>
+    <p style="margin-top: 0; margin-bottom: 0">
+    <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般">
+    <INPUT type=radio
+      name=attacker value="3">崩擊等級<SELECT size=1 name=sbig> <OPTION value=1 selected>
+    1</OPTION> <OPTION
+        value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
+        <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
+        value=7>7</OPTION> <OPTION value=8>8</OPTION> <OPTION value=9>9</OPTION>
+        <OPTION value=10>10</OPTION></SELECT></span></font></TD>
+    <TD width="73%" bgcolor="#EFF3F7">
+    <table border="0" cellspacing="0" width="100%" id="AutoNumber2" cellpadding="0" style="border-collapse: collapse" bordercolor="#111111">
+      <tr>
+        <td width="100%"><font face="新細明體" style="font-size: 一般">
+        <span style="font-size: 一般"><INPUT
+      type=radio name=atked value="1" checked>通常(若對手崩擊指防禦)</span></font></td>
+      </tr>
+      <tr>
+        <td width="100%"><font face="新細明體" style="font-size: 一般">
+        <span style="font-size: 一般"><INPUT type=radio name=atked value="2">使用諸刃
+      <SELECT size=1 name=sdie> <OPTION value=1 selected>1</OPTION> <OPTION
+        value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
+        <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
+        value=7>7</OPTION> <OPTION value=8>8</OPTION> <OPTION value=9>9</OPTION>
+        <OPTION value=10>10</OPTION></SELECT> </span></font></td>
+      </tr>
+      <tr>
+        <td width="100%"><font face="新細明體" style="font-size: 一般">
+        <span style="font-size: 一般"><INPUT type=radio name=atked value="3">使用陽炎
+      <SELECT size=1 name=bdie> <OPTION value=1 selected>1</OPTION> <OPTION
+        value=2>2</OPTION> <OPTION value=3>3</OPTION> <OPTION value=4>4</OPTION>
+        <OPTION value=5>5</OPTION> <OPTION value=6>6</OPTION> <OPTION
+        value=7>7</OPTION> <OPTION value=8>8</OPTION> <OPTION value=9>9</OPTION>
+        <OPTION value=10>10</OPTION></SELECT></span></font></td>
+      </tr>
+      <tr>
+        <td width="100%">　</td>
+      </tr>
+    </table>
+    </TD>
+    </TR>
+  <TR>
+    <TD width="20%" bgcolor="#6699CC" align="center"><b>
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般">武器狀態</font></b></TD>
+    <TD width="108%" colspan="2" bgcolor="#EFF3F7"> 
+    <font face="新細明體" style="font-size: 一般"> <SELECT size=1 name=weapon>
+        <OPTION value=1 selected>有武器(玩家或格鬥士)</OPTION> <OPTION
+        value=2>無武器(非玩家或非格鬥士)</OPTION></SELECT></font></TD>
+    </TR>
+  <TR>
+    <TD width="20%" bgcolor="#6699CC" align="center"><b>
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般">種族相對影響</font></b></TD>
+    <TD width="108%" colspan="2" bgcolor="#EFF3F7">
+    <font face="新細明體" style="font-size: 一般"><SELECT size=1 name=kind>
+        <OPTION value=1>攻擊者全剋挨打者</OPTION> <OPTION value=2>攻擊者半剋挨打者</OPTION>
+        <OPTION value=3 selected>雙方不相剋</OPTION> <OPTION
+        value=4>挨打者半剋攻擊者</OPTION> <OPTION value=5>挨打者全剋攻擊者</OPTION></SELECT></font></TD>
+    </TR>
+  <TR>
+    <TD width="20%" bgcolor="#6699CC" align="center"><b>
+    <font color="#FFFFFF" face="新細明體" style="font-size: 一般">水晶屬性影響</font></b></TD>
+    <TD width="108%" colspan="2" bgcolor="#EFF3F7">
+    <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般"><SELECT size=1 name=porn>
+        <OPTION value=1 selected>攻擊者剋被攻擊者</OPTION> <OPTION
+        value=2>被攻擊者剋攻擊者</OPTION></SELECT> <INPUT size=4 value=0 name=extn></span></font><FONT
+      color=red face="新細明體" style="font-size: 一般">%</FONT></TD>
+    </TR>
+  <TR>
+    <TD width="153%" colSpan=3 bgcolor="#6699CC" align="center">
+      <CENTER><font face="新細明體" style="font-size: 一般"><INPUT onclick=Phoenix() type=button value=計算損傷 name=calculate></font></CENTER></TD></TR>
+  <TR>
+    <TD width="20%" bgcolor="#6699CC" align="center">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般"><b>理論傷害值</b></font></TD>
+    <TD width="133%" colSpan=2 bgcolor="#EFF3F7">
+      <CENTER>
+      <p style="margin-top: 0; margin-bottom: 0">
+      <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般"><INPUT size=4 name=damage90> <INPUT size=4 name=damage91> <INPUT
+      size=4 name=damage92> <INPUT size=4 name=damage93> <INPUT size=4
+      name=damage94> <INPUT size=4 name=damage95> <INPUT size=4 name=damage96>
+      <INPUT size=4 name=damage97> <INPUT size=4 name=damage98> <INPUT size=4
+      name=damage99><BR><INPUT size=4 name=damage100><BR>
+      <INPUT size=4
+      name=damage101> <INPUT size=4 name=damage102> <INPUT size=4
+      name=damage103> <INPUT size=4 name=damage104> <INPUT size=4
+      name=damage105> <INPUT size=4 name=damage106> <INPUT size=4
+      name=damage107> <INPUT size=4 name=damage108> <INPUT size=4
+      name=damage109> <INPUT size=4
+name=damage110></span></font></p>
+      </CENTER></TD></TR>
+  <TR>
+    <TD width="153%" colSpan=3 align="center">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" id="AutoNumber3" style="border-collapse: collapse; font-size: 10 pt" bordercolor="#111111" height="204">
+        <tr>
+          <td width="50%" rowspan="2" height="204">
+          <table border="1" cellspacing="1" bordercolor="#6699CC" width="100%" id="AutoNumber4">
+            <tr>
+              <td width="100%" colspan="5" bgcolor="#6699CC" bordercolor="#6699CC">
+              <p align="center">
+            <font color="#FFFFFF" face="新細明體" style="font-size: 一般">種族相剋表</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">　</td>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">全剋</font></td>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">半剋</font></td>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">被全剋</font></td>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">被半剋</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">龍系</font></td>
+      <td width="10%" align="center" bgcolor="#EFF3F7" height="13">
+      <font face="新細明體" style="font-size: 一般">飛行系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">野獸系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">金屬系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">特殊系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">飛行系</font></td>
+      <td width="10%" align="center" bgcolor="#EFF3F7" height="11">
+      <font face="新細明體" style="font-size: 一般">昆蟲系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">不死系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">龍系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">野獸系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">昆蟲系</font></td>
+      <td width="10%" align="center" bgcolor="#EFF3F7" height="13">
+      <font face="新細明體" style="font-size: 一般">特殊系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">植物系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">飛行系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">人型系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">特殊系</font></td>
+      <td width="10%" align="center" bgcolor="#EFF3F7" height="13">
+      <font face="新細明體" style="font-size: 一般">金屬系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">龍系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">昆蟲系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">植物系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">金屬系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">龍系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">人型系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">特殊系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">不死系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">不死系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">人型系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">金屬系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">植物系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">飛行系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">人型系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">野獸系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">昆蟲系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">不死系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">金屬系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">野獸系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">植物系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">飛行系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">人型系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">龍系</font></td>
+            </tr>
+            <tr>
+            <td width="10%" bgcolor="#6699CC" align="center" bordercolor="#6699CC">
+      <font color="#FFFFFF" face="新細明體" style="font-size: 一般">植物系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">不死系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">特殊系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">野獸系</font></td>
+            <td width="10%" bgcolor="#EFF3F7" align="center">
+            <font face="新細明體" style="font-size: 一般">昆蟲系</font></td>
+            </tr>
+          </table>
+          </td>
+          <td width="50%" bgcolor="#EFF3F7">
+          <p style="margin-top: 0; margin-bottom: 0">
+          <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般">水晶屬性傷害值的計算式：</span></font><span style="font-size: 一般"></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="新細明體">地→水→火→風→地</font></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="新細明體">( 剋 x 被剋 )+( 被剋 x 剋) =
+          影響百分比</font></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="新細明體">例：<font color="#FF0000">火3風7
+          → 風8地2<br>
+          火剋風︰3 x 8 = 24% <br>
+          風剋地：7 x 2 = 14% <br>
+          剛好兩種屬性都剋到，總水晶屬性百分比為 24% + 14% = 38%</font></font></p>
+          <p style="margin-top: 0; margin-bottom: 0"><font face="新細明體"><font color="#ff0000">火3</font><font color="#FF0000">風7
+          → 水6</font><font color="#ff0000">火4</font><font color="#FF0000"><br>
+          火被水剋：(-3) x 6 = -18%<br>
+          風被火剋：(-7) x 4 = -28%<br>
+          因為兩種屬性都被剋到，總水晶屬性百分比為 (-18%) - 28% = -46%</font></font></td>
+        </tr>
+        <tr>
+          <td width="50%" bgcolor="#EFF3F7"></span><font color="blue">
+          <span style="font-size: 一般">
+          <p align="center" style="margin-top: 0; margin-bottom: 0">
+          <font face="新細明體">
+          <font style="font-size: 一般">◎原著：巴哈姆特（Wraith）◎</font> </font> </p>
+          <p style="MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px" align="center">
+          </span>
+          <font face="新細明體" style="font-size: 一般"><span style="font-size: 一般">◎修改：巴哈姆特（diablo1974）◎</span></font></font></td>
+        </tr>
+      </table>
+    </TD></TR></TBODY></TABLE><FONT color=green> </CENTER></FORM>
+<DIV id=waterMark style="POSITION: absolute" align=center>
+<DD><font face="新細明體" style="font-size: 一般">&nbsp;</font></DD></DIV>
+<SCRIPT language=JavaScript1.2>
+<!--
+// Watermark script by Paul Anderson, CNET Builder.com. All rights reserved.
+
+markW = 77; // 圖檔的寬
+markH = 99; // 圖檔的長
+markX = 90; // 螢幕上X軸的位置
+markY = 95; // 螢幕上Y軸的位置
+markRefresh = 20; // 每幾千分之一秒重新定位
+
+// set common object reference
+if (!document.all) document.all = document;
+if (!document.all.waterMark.style) document.all.waterMark.style = document.all.waterMark;
+
+wMark = document.all.waterMark.style;
+wMark.width = markW;
+wMark.height = markH;
+navDOM = window.innerHeight; // Nav DOM flag
+
+function setVals() {
+barW = 0; // scrollbar compensation for PC Nav
+barH = 0;
+if (navDOM) {
+if (document.height > innerHeight) barW = 20;
+if (document.width > innerWidth) barH = 20;
+} else {
+innerWidth = document.body.clientWidth;
+innerHeight = document.body.clientHeight;
+}
+posX = ((innerWidth - markW)-barW) * (markX/100);
+posY = ((innerHeight - markH)-barH) * (markY/100);
+}
+
+function wRefresh() {
+wMark.left = posX + (navDOM?pageXOffset:document.body.scrollLeft);
+wMark.top = posY + (navDOM?pageYOffset:document.body.scrollTop);
+}
+
+function markMe() {
+setVals();
+window.onresize=setVals;
+markID = setInterval ("wRefresh()",markRefresh);
+}
+
+window.onload=markMe; // safety for Mac IE4.5
+
+//-->
+</SCRIPT>
+</FONT>
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b>
+<font face="serif" color="#000000">&copy; 2003 Revelation' book of&nbsp; , All rights 
+reserved .</font></b><font color="#FFFFFF"><b><font face="serif" style="font-size: 一般">'</font></b></font></p>
+
+</BODY></HTML>
